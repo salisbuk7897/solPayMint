@@ -16,9 +16,6 @@ export default function Homepg() {
       </div>
       <div className="flex flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-10">
         <div className="grid grid-cols-2 gap-4">
-          {/* <button className="cta-button connect-wallet-button">
-            Connect to Wallet
-          </button> */}
           <div className="basis-1/4">
             <WalletMultiButton className='!bg-gray-500 hover:scale-105' />
           </div>
