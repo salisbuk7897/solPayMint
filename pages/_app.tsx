@@ -8,6 +8,7 @@ import { clusterApiUrl } from '@solana/web3.js'
 import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets'
 // Default styles that can be overridden by your app
 require('@solana/wallet-adapter-react-ui/styles.css');
+
 function MyApp({ Component, pageProps }: AppProps) {
    // The network can be set to 'devnet', 'testnet', or 'mainnet-beta'.
    const network = WalletAdapterNetwork.Devnet;
@@ -22,6 +23,7 @@ function MyApp({ Component, pageProps }: AppProps) {
      new PhantomWalletAdapter(),
      new SolflareWalletAdapter({ network }),
    ];
+   
   return(
     <ConnectionProvider endpoint={endpoint}>
       <WalletProvider wallets={wallets} autoConnect>
@@ -30,7 +32,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
-  ) //
+  )
 }
 
 export default MyApp
