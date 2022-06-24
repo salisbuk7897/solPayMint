@@ -9,10 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "12.1.6",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
-    "@tailwindcss/forms": "^0.5.0",
+    "@metaplex/js": "^4.7.0",
+    "@project-serum/anchor": "^0.25.0-beta.1",
     "@solana/pay": "^0.2.0",
     "@solana/spl-token": "^0.2.0",
     "@solana/wallet-adapter-base": "^0.9.5",
@@ -20,9 +18,13 @@
     "@solana/wallet-adapter-react-ui": "^0.9.7",
     "@solana/wallet-adapter-wallets": "^0.16.1",
     "@solana/web3.js": "^1.43.4",
+    "@tailwindcss/forms": "^0.5.0",
     "bignumber.js": "^9.0.2",
     "bs58": "^5.0.0",
-    "dotenv": "^16.0.1"
+    "dotenv": "^16.0.1",
+    "next": "12.1.6",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@types/node": "18.0.0",
