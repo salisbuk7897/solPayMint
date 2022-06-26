@@ -1,50 +1,54 @@
-import { AnchorProvider, Program, Wallet, web3 } from "@project-serum/anchor";
+import * as anchor from "@project-serum/anchor";
 
-export interface CandyMachine {
-    id: web3.PublicKey;
-    connection: web3.Connection;
-    program: Program;
-}
+import { CandyMachine, CandyMachineState } from "./candyMachine.model"
 
-interface CandyMachineState {
-    candyMachine: CandyMachine;
-    itemsAvailable: number;
-    itemsRedeemed: number;
-    itemsRemaining: number;
-    goLiveDate: Date;
-}
+import next from "next";
 
-
-export const CANDY_MACHINE_PROGRAM = new web3.PublicKey(
+export const CANDY_MACHINE_PROGRAM = new anchor.web3.PublicKey(
     "cndyAnrLdpjq1Ssp1z8xxDsB8dxe7u4HL5Nxi2K5WXZ"
 );
 
+const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new anchor.web3.PublicKey(
+    "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+);
+
+const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey(
+    "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
+);
+
+// const rpcHost = "https://explorer-api.devnet.solana.com";
+// export const connection = new anchor.web3.Connection(rpcHost);
+// export const candyMachineId: anchor.web3.PublicKey = "GbezJRdDXJzknoZipBQZsJqBvauqD3xNS7bPn75ivPbD" as any
 
 export const getCandyMachineState = async (
-    anchorWallet: Wallet,
-    candyMachineId: web3.PublicKey,
-    connection: web3.Connection
-): Promise<CandyMachineState> => {
-    const provider = new AnchorProvider(connection, anchorWallet, {
-        preflightCommitment: "processed",
-    });
+    anchorWallet: anchor.Wallet,
+    candyMachineId: anchor.web3.PublicKey,
+    connection: anchor.web3.Connection
+): Promise<CandyMachineState | undefined> => {
+    try {
+        const anchorProvider = new anchor.AnchorProvider(connection, anchorWallet, {
+            preflightCommitment: "recent",
+        });
 
-    const idl = await Program.fetchIdl(CANDY_MACHINE_PROGRAM, provider);
+        const idl = await anchor.Program.fetchIdl(CANDY_MACHINE_PROGRAM, anchorProvider) as anchor.Idl;
 
-    if (idl) {
-        const program = new Program(
+
+        const program = new anchor.Program(
             idl,
             CANDY_MACHINE_PROGRAM,
-            provider
+            anchorProvider
         );
+
         const candyMachine = {
             id: candyMachineId,
             connection,
             program,
         };
+
         const state: any = await program.account.candyMachine.fetch(
-            candyMachineId
+            "GbezJRdDXJzknoZipBQZsJqBvauqD3xNS7bPn75ivPbD"
         );
+
         const itemsAvailable = state.data.itemsAvailable.toNumber();
         const itemsRedeemed = state.itemsRedeemed.toNumber();
         const itemsRemaining = itemsAvailable - itemsRedeemed;
@@ -59,10 +63,10 @@ export const getCandyMachineState = async (
             itemsRemaining,
             goLiveDate,
         };
-    } else {
-        throw new Error(
-            `Fetching idl returned null: check CANDY_MACHINE_PROGRAM`
-        );
-    }
-};
 
+    } catch (err) {
+        console.log(err)
+    }
+
+
+};

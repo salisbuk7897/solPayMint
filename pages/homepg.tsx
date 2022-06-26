@@ -1,9 +1,48 @@
-import React, { useContext } from "react";
+import * as anchor from "@project-serum/anchor";
+
+import React, { useContext, useEffect } from "react";
 
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
-import { useWallet } from '@solana/wallet-adapter-react'
+
+// import { useWallet } from '@solana/wallet-adapter-react'
+
+// import { candyMachineId, connection, getCandyMachineState } from "../utils/candyMachine";
+
+
+
 
 export default function Homepg() {
+  // const wallet = useWallet()
+
+//   useEffect(() => {
+//     (async () => {
+//         if (
+//             !wallet ||
+//             !wallet.publicKey ||
+//             !wallet.signAllTransactions ||
+//             !wallet.signTransaction
+//         ) {
+//             return;
+//         }
+
+//         const anchorWallet = {
+//             publicKey: wallet.publicKey,
+//             signAllTransactions: wallet.signAllTransactions,
+//             signTransaction: wallet.signTransaction,
+//         } as anchor.Wallet;
+
+//         console.log(await getCandyMachineState(anchorWallet,candyMachineId, connection))
+
+//         const { candyMachine, goLiveDate, itemsRemaining } =
+//             await getCandyMachineState(
+//                 anchorWallet,
+//                 candyMachineId,
+//                 connection
+//             );
+
+//     })();
+// }, [wallet, candyMachineId, connection]);
+  
   return (
     <div className="flex w-full justify-center items-center">
       <div className="flex mf:flex-row flex-col items-start justify-between md:p-20 py-12 px-4">
