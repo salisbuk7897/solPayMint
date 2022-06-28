@@ -7,10 +7,6 @@ export const CANDY_MACHINE_PROGRAM = new PublicKey(
     "cndy3Z4yapfJBmL3ShUp5exZKqR3z33thTzeNMm2gRZ"
 );
 
-const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;;
-export const connection = new Connection(rpcHost)
-export const candyMachineId = process.env.NEXT_CANDY_MACHINE_ID
-
 export const getCandyMachineState = async (
     anchorWallet: anchor.Wallet,
     candyMachineId: anchor.web3.PublicKey,
