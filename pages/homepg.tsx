@@ -1,10 +1,8 @@
-import * as anchor from "@project-serum/anchor";
-
-import React, { useContext, useEffect } from "react";
-
+import React from "react";
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
 
 export default function Homepg() {
+
   return (
     <div className="flex w-full justify-center items-center">
       <div className="flex mf:flex-row flex-col items-start justify-between md:p-20 py-12 px-4">
