@@ -1,7 +1,8 @@
-import React, { useContext } from "react";
+import * as anchor from "@project-serum/anchor";
+
+import React, { useContext, useEffect } from "react";
 
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
-import { useWallet } from '@solana/wallet-adapter-react'
 
 export default function Homepg() {
   return (
@@ -30,5 +31,3 @@ export default function Homepg() {
     </div>
   );
 };
-
-//export default Homepg;

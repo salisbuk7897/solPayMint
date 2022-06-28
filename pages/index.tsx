@@ -1,12 +1,11 @@
-import type { NextPage } from 'next'
 import Head from 'next/head'
-import Image from 'next/image'
-import styles from '../styles/Home.module.css'
 import Homepg from './homepg'
+import type { NextPage } from 'next'
+import styles from '../styles/Home.module.css'
 
 const Home: NextPage = () => {
   return (
-    <div className="mt-0 h-screen gradient-bg-welcome"> //#58246B;
+    <div className="mt-0 h-screen gradient-bg-welcome">;
         <Homepg /> 
     </div>
     
