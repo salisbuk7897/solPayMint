@@ -16,10 +16,6 @@ const TOKEN_METADATA_PROGRAM_ID = new anchor.web3.PublicKey(
     "metaqbxxUerdq28cj1RbAWkYQm3ybzjb6a8bt518x1s"
 );
 
-// const rpcHost = "https://explorer-api.devnet.solana.com";
-// export const connection = new anchor.web3.Connection(rpcHost);
-// export const candyMachineId: anchor.web3.PublicKey = "GbezJRdDXJzknoZipBQZsJqBvauqD3xNS7bPn75ivPbD" as any
-
 export const getCandyMachineState = async (
     anchorWallet: anchor.Wallet,
     candyMachineId: anchor.web3.PublicKey,
