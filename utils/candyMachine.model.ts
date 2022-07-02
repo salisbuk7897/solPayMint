@@ -13,3 +13,9 @@ export interface CandyMachineState {
     itemsRemaining: number;
     goLiveDate: Date;
 }
+
+export enum SequenceType {
+    Sequential,
+    Parallel,
+    StopOnFailure,
+}
