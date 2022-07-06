@@ -4,7 +4,7 @@ import {
     CandyMachine,
     awaitTransactionSignatureConfirmation,
     getCandyMachineState,
-    mintOneToken,
+    mintMultipleToken
 } from "../utils";
 import { useEffect, useState } from "react";
 
@@ -15,17 +15,10 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import useWalletBalance from "./useWalletBalance";
 
 const txTimeout = 50000;
+const MINT_PRICE_SOL = 1;
 
 const candyMachineId = new anchor.web3.PublicKey(
     process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
-);
-
-const treasury = new anchor.web3.PublicKey(
-    process.env.NEXT_PUBLIC_TREASURY_ADDRESS!
-);
-
-const config = new anchor.web3.PublicKey(
-    process.env.NEXT_PUBLIC_CANDY_MACHINE_CONFIG!
 );
 
 const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
@@ -71,7 +64,7 @@ export default function useCandyMachine() {
                     candyMachineId,
                     connection
                 );
-
+            console.log({itemsRemaining})
             setIsSoldOut(itemsRemaining === 0);
             setMintStartDate(goLiveDate);
             setCandyMachine(candyMachine);
@@ -101,31 +94,80 @@ export default function useCandyMachine() {
     }, [wallet, candyMachineId, connection, isMinting]);
 
 
-    const startMint = async () => {
+    const startMintMultiple = async (quantity: number) => {
         try {
             setIsMinting(true);
             if (wallet.connected && candyMachine?.program && wallet.publicKey) {
-                const mintTxId = await mintOneToken(
+                const oldBalance =
+                    (await connection.getBalance(wallet?.publicKey)) /
+                    LAMPORTS_PER_SOL;
+                const futureBalance = oldBalance - MINT_PRICE_SOL * quantity;
+
+                const signedTransactions: any = await mintMultipleToken(
                     candyMachine,
-                    config,
                     wallet.publicKey,
-                    treasury
+                    quantity
                 );
 
-                const status = await awaitTransactionSignatureConfirmation(
-                    mintTxId,
-                    txTimeout,
-                    connection,
-                    "singleGossip",
-                    false
-                );
+                const promiseArray = [];
 
-                if (!status?.err) {
-                    toast.success(
-                        "Congratulations! Mint succeeded! Check your wallet :)"
+                for (
+                    let index = 0;
+                    index < signedTransactions.length;
+                    index++
+                ) {
+                    const tx = signedTransactions[index];
+                    promiseArray.push(
+                        awaitTransactionSignatureConfirmation(
+                            tx,
+                            txTimeout,
+                            connection,
+                            "singleGossip",
+                            true
+                        )
                     );
-                } else {
-                    toast.error("Mint failed! Please try again!");
+                }
+
+                const allTransactionsResult = await Promise.all(promiseArray);
+                let totalSuccess = 0;
+                let totalFailure = 0;
+
+                for (
+                    let index = 0;
+                    index < allTransactionsResult.length;
+                    index++
+                ) {
+                    const transactionStatus = allTransactionsResult[index];
+                    if (!transactionStatus?.err) {
+                        totalSuccess += 1;
+                    } else {
+                        totalFailure += 1;
+                    }
+                }
+
+                let newBalance =
+                    (await connection.getBalance(wallet?.publicKey)) /
+                    LAMPORTS_PER_SOL;
+
+                while (newBalance > futureBalance) {
+                    await sleep(1000);
+                    newBalance =
+                        (await connection.getBalance(wallet?.publicKey)) /
+                        LAMPORTS_PER_SOL;
+                }
+
+                if (totalSuccess) {
+                    toast.success(
+                        `Congratulations! ${totalSuccess} mints succeeded! Your NFT's should appear in your wallet soon :)`,
+                        { duration: 6000, position: "bottom-center" }
+                    );
+                }
+
+                if (totalFailure) {
+                    toast.error(
+                        `Some mints failed! ${totalFailure} mints failed! Check your wallet :(`,
+                        { duration: 6000, position: "bottom-center" }
+                    );
                 }
             }
         } catch (error: any) {
@@ -155,12 +197,12 @@ export default function useCandyMachine() {
         }
     };
 
-
     return {
         isSoldOut,
         mintStartDate,
         isMinting,
         nftsData,
-        startMint
+        startMintMultiple,
+        candyMachine
     };
 }

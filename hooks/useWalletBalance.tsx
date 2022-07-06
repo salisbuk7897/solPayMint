@@ -1,6 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 
-import { ReactNode, createContext, useContext, useEffect, useState } from "react";
+import { ReactNode, createContext, useEffect, useState } from "react";
 
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -12,7 +12,19 @@ const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
 const connection = new anchor.web3.Connection(rpcHost);
 
 export default function useWalletBalance() {
-  const [balance, setBalance]: any = useContext(BalanceContext);
+  const [balance, setBalance]: any = useState(0);
+  const wallet = useWallet();
+
+  useEffect(() => {
+    (async () => {
+      if (wallet?.publicKey) {
+        const balance = await connection.getBalance(wallet.publicKey);
+        console.log({publicKey: wallet.publicKey, balance})
+        setBalance(balance / LAMPORTS_PER_SOL);
+      }
+    })();
+  }, [wallet, connection]);
+  
   return [balance, setBalance];
 }
 

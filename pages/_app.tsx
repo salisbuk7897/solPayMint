@@ -1,11 +1,14 @@
 import '../styles/globals.css'
+
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
+import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets'
+
 import type { AppProps } from 'next/app'
 import Head from 'next/head'
-import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
-import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
 import { clusterApiUrl } from '@solana/web3.js'
-import { PhantomWalletAdapter, SolflareWalletAdapter } from '@solana/wallet-adapter-wallets'
+
 // Default styles that can be overridden by your app
 require('@solana/wallet-adapter-react-ui/styles.css');
 
