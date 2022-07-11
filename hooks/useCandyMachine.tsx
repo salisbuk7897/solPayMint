@@ -38,6 +38,8 @@ export default function useCandyMachine() {
             itemsRemaining: 0,
             itemsRedeemed: 0,
             itemsAvailable: 0,
+            price: 0,
+            treasury: "",
         } as any)
     );
 
@@ -81,14 +83,17 @@ export default function useCandyMachine() {
                     signTransaction: wallet.signTransaction,
                 } as anchor.Wallet;
 
-                const { itemsRemaining, itemsRedeemed, itemsAvailable } =
+                const data =
                     await getCandyMachineState(
                         anchorWallet,
                         candyMachineId,
                         connection
                     );
 
-                setNftsData({ itemsRemaining, itemsRedeemed, itemsAvailable });
+                const { itemsRemaining, itemsRedeemed, itemsAvailable, candyMachine } = data
+                const price = candyMachine.state.data.price
+                const treasury = candyMachine.state.wallet
+                setNftsData({ itemsRemaining, itemsRedeemed, itemsAvailable, price, treasury });
             }
         })();
     }, [wallet, candyMachineId, connection, isMinting]);
@@ -170,6 +175,7 @@ export default function useCandyMachine() {
                     );
                 }
             }
+            console.log("DONE")
         } catch (error: any) {
             let message = error.message || "Minting failed! Please try again!";
             if (!error.message) {
@@ -195,6 +201,7 @@ export default function useCandyMachine() {
             }
             setIsMinting(false);
         }
+
     };
 
     return {

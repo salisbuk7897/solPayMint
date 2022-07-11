@@ -23,6 +23,13 @@ const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey(
 
 const { SystemProgram } = anchor.web3;
 
+/**
+ * 
+ * @param anchorWallet anchor wallet object containing the wallet details
+ * @param candyMachineId candy machine id gotten after uploading nfts
+ * @param connection 
+ * @returns 
+ */
 export const getCandyMachineState = async (
     anchorWallet: anchor.Wallet,
     candyMachineId: anchor.web3.PublicKey,
@@ -68,6 +75,12 @@ export const getCandyMachineState = async (
     };
 };
 
+/**
+ * 
+ * @param wallet 
+ * @param mint 
+ * @returns 
+ */
 const getTokenWallet = async (
     wallet: anchor.web3.PublicKey,
     mint: anchor.web3.PublicKey

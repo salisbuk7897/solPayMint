@@ -8,10 +8,15 @@ export interface CandyMachine {
 }
 
 export interface CandyMachineState {
+    /**Candy machine object containing the candy machine information */
     candyMachine: CandyMachine;
+    /**nfts available to mint */
     itemsAvailable: number;
+    /**nfts that have been minted */
     itemsRedeemed: number;
+    /**nfts that haven't been minted  */
     itemsRemaining: number;
+    /**Date minting should start */
     goLiveDate: Date;
 }
 

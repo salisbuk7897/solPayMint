@@ -1,13 +1,9 @@
-import { useEffect, useState } from 'react';
-
 import Homepg from './homepg'
 import type { NextPage } from 'next'
 import useCandyMachine from "../hooks/useCandyMachine";
-import { useWallet } from "@solana/wallet-adapter-react";
-import useWalletBalance from "../hooks/useWalletBalance";
+import { useEffect } from 'react';
 
 const Home: NextPage = () => {
-  const [balance, setBalance] = useWalletBalance();
   const {
     isSoldOut,
     mintStartDate,
@@ -17,10 +13,8 @@ const Home: NextPage = () => {
     candyMachine
   } = useCandyMachine();
 
-  const wallet = useWallet();
-  
-
   useEffect(() => {
+    //price and tresury can be found in the nftsData object
     if (new Date(mintStartDate).getTime() < Date.now()) {
       console.log({
         isSoldOut,
@@ -29,7 +23,6 @@ const Home: NextPage = () => {
         nftsData
       })
     }
-    startMintMultiple(2);
   }, [candyMachine]);
   
   return (
