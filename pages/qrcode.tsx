@@ -7,7 +7,7 @@ export default function Qrcode(){
     useEffect(() => {
         // window.location is only available in the browser, so create the URL in here
         const { location } = window
-        const apiUrl = `${location.protocol}//${location.host}/transaction`
+        const apiUrl = `${location.protocol}//${location.host}/api/transaction` //remember to add transaction reference and buyer account as query params
         const urlParams: TransactionRequestURLFields = {
             link: new URL(apiUrl),
             label: "SolPay Mint",
