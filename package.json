@@ -14,7 +14,7 @@
     "@solana/pay": "^0.2.0",
     "@solana/spl-token": "^0.2.0",
     "@solana/wallet-adapter-base": "^0.9.5",
-    "@solana/wallet-adapter-react": "^0.15.5",
+    "@solana/wallet-adapter-react": "^0.15.6",
     "@solana/wallet-adapter-react-ui": "^0.9.7",
     "@solana/wallet-adapter-wallets": "^0.16.1",
     "@solana/web3.js": "^1.43.4",
@@ -23,8 +23,8 @@
     "bs58": "^5.0.0",
     "dotenv": "^16.0.1",
     "next": "12.1.6",
-    "react-circular-progressbar": "^2.0.4",
     "react": "18.2.0",
+    "react-circular-progressbar": "^2.0.4",
     "react-dom": "18.2.0",
     "react-hot-toast": "^2.2.0"
   },

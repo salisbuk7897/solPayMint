@@ -58,14 +58,14 @@ async function post(
     }
 
     // We pass the buyer's public key in JSON body
-    const account  = "CteftmQggr8XxKKfDRFLiyW6yVtdiNgqpvHKdwoC1KVD" // const {account} = req.body as TransactionInputData
+    const account  = "" // const {account} = req.body as TransactionInputData
     if (!account) {
       res.status(40).json({ error: "No account provided" })
       return
     }
 
     // We get the shop private key from .env - this is the same as in our script
-    const shopPrivateKey = "2NgbyLntQ9VicGkjSVxubrXLgmjF9HBncfHJeN97pVJWfUKcaTE1YFhN7dqqeed8MBt55ZHwv4kMMd5FmDABxKM1" //process.env.SHOP_PRIVATE_KEY as string
+    const shopPrivateKey = "" //process.env.SHOP_PRIVATE_KEY as string
     if (!shopPrivateKey) {
       res.status(500).json({ error: "Shop private key not available" })
     }
@@ -73,7 +73,6 @@ async function post(
 
     const buyerPublicKey = new PublicKey(account)
     const shopPublicKey = shopKeypair.publicKey
-
     const network = WalletAdapterNetwork.Devnet
     const endpoint = clusterApiUrl(network)
     const connection = new Connection(endpoint)

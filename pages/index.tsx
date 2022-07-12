@@ -1,10 +1,10 @@
 import Homepg from './homepg'
 import type { NextPage } from 'next'
-import useCandyMachine from "../hooks/useCandyMachine";
+//import useCandyMachine from "../hooks/useCandyMachine";
 import { useEffect } from 'react';
 
 const Home: NextPage = () => {
-  const {
+  /* const {
     isSoldOut,
     mintStartDate,
     isMinting,
@@ -24,7 +24,7 @@ const Home: NextPage = () => {
       })
     }
   }, [candyMachine]);
-  
+   */
   return (
     <div className="mt-0 h-screen gradient-bg-welcome">;
         <Homepg /> 

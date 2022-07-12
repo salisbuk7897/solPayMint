@@ -28,7 +28,7 @@ export default function useWalletBalance() {
   return [balance, setBalance];
 }
 
-export const WalletBalanceProvider: React.FC<{children:ReactNode}> = ({ children }) => {
+/* export const WalletBalanceProvider: React.FC<{children:ReactNode}> = ({ children }) => {
   const wallet = useWallet();
   const [balance, setBalance] = useState(0);
 
@@ -46,4 +46,4 @@ export const WalletBalanceProvider: React.FC<{children:ReactNode}> = ({ children
       {children}
     </BalanceContext.Provider>
   );
-};
+}; */
