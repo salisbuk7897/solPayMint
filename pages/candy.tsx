@@ -1,9 +1,11 @@
 import * as anchor from "@project-serum/anchor";
+
 import {
     CandyMachine,
     getCandyMachineState
 } from "../utils";
 import { useEffect, useState } from "react";
+
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { sleep } from "../utils";
 import { useWallet } from "@solana/wallet-adapter-react";
