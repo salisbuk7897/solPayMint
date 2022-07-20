@@ -1,30 +1,25 @@
-//import { createTransferCheckedInstruction, getAssociatedTokenAddress, getMint, getOrCreateAssociatedTokenAccount, getAccount } from "@solana/spl-token"
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base"
-//import { clusterApiUrl, Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js"
-import { NextApiRequest, NextApiResponse } from "next"
-import base58 from 'bs58'
-import { useEffect, useMemo, useRef } from "react";
-import { clusterApiUrl, Connection, Keypair, PublicKey, Transaction, TransactionInstruction } from '@solana/web3.js';
-import BigNumber from 'bignumber.js';
-import { NATIVE_MINT, createTransferCheckedInstruction, getAccount, getAssociatedTokenAddress, getMint } from '@solana/spl-token';
-//import { TEN } from '@solana/pay';
 import * as anchor from "@project-serum/anchor";
-import { MintLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { createInitializeMintInstruction, createMintToInstruction } from "@solana/spl-token";
-
-import { CandyMachineState } from "../../utils/candyMachine.model"
-import { sendTransactions } from "../../utils/candyMachine.helpers";
 
 import {
-    CandyMachine,
-    awaitTransactionSignatureConfirmation,
-    getCandyMachineState,
-    mintMultipleToken,
-    mintToken
+  CandyMachine,
+  awaitTransactionSignatureConfirmation,
+  getCandyMachineState,
+  mintMultipleToken,
+  mintToken
 } from "../../utils";
+import { Connection, Keypair, PublicKey, SystemProgram, Transaction, TransactionInstruction, clusterApiUrl } from '@solana/web3.js';
+import { MintLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
+import { NATIVE_MINT, createTransferCheckedInstruction, getAccount, getAssociatedTokenAddress, getMint } from '@solana/spl-token';
+import { NextApiRequest, NextApiResponse } from "next"
+import { createInitializeMintInstruction, createMintToInstruction } from "@solana/spl-token";
+import { useEffect, useMemo, useRef } from "react";
 
-
+import BigNumber from 'bignumber.js';
+import { CandyMachineState } from "../../utils/candyMachine.model"
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { WalletAdapterNetwork } from "@solana/wallet-adapter-base"
+import base58 from 'bs58'
+import { sendTransactions } from "../../utils/candyMachine.helpers";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 // This is your token/coupon address
@@ -61,16 +56,14 @@ function get(res: NextApiResponse<TransactionGetResponse>) {
 
 async function post(
   req: NextApiRequest,
-  res: any
-  //res: NextApiResponse<TransactionOutputData | ErrorOutput>
+  res: NextApiResponse<TransactionOutputData | ErrorOutput>
 ) {
   try {
-    
+
     console.log("in transaction")
     console.log(req.query.amount)
-    // We pass the selected items in the query, calculate the expected cost
-    let amount = parseFloat(req.query.amount as string)/10//Object.entries(req.query)
-    //const { amount } = new BigNumber(req.query as string);//15 //get amount from candymachine state
+
+    let amount = parseFloat(req.query.amount as string) / 10//Object.entries(req.query)
     if (amount <= 0) {
       res.status(400).json({ error: "Can't mint with charge of 0" })
       return
@@ -86,59 +79,47 @@ async function post(
     }
 
     // We pass the buyer's public key in JSON body
-    const {account} = req.body as TransactionInputData
+    const { account } = req.body as TransactionInputData
     if (!account) {
       res.status(40).json({ error: "No account provided" })
       return
     }
-    //console.log(`wallet: ${account}, price: ${amount}`);
-
-    // We get the shop private key from .env - this is the same as in our script
-    
-    const shopPrivateKey = process.env.NEXT_PUBLIC_SHOP_PRIVATE_KEY as string
-    if (!shopPrivateKey) {
-      res.status(500).json({ error: "Shop private key not available" })
-    }
-    const shopKeypair = Keypair.fromSecretKey(base58.decode(shopPrivateKey))
-
-    const buyerPublicKey = new PublicKey(account)
-    const shopPublicKey = shopKeypair.publicKey
 
     const network = WalletAdapterNetwork.Devnet
     const endpoint = clusterApiUrl(network)
     const connection = new Connection(endpoint)
-    const senderInfo = await connection.getAccountInfo(buyerPublicKey);
-    if (!senderInfo) throw new Error('sender not found');
-    // Get the buyer and seller coupon token accounts
-    // Buyer one may not exist, so we create it (which costs SOL) as the shop account if it doesn't 
-    /* const buyerCouponAccount = await getOrCreateAssociatedTokenAccount(
-      connection,
-      shopKeypair, // shop pays the fee to create it
-      couponAddress, // which token the account is for
-      buyerPublicKey, // who the token account belongs to (the buyer)
-    ) */
 
-    //const shopCouponAddress = await getAssociatedTokenAddress(couponAddress, shopPublicKey)
+    // Minting code
+    const buyerPublicKey = new PublicKey(account)
+    const dummy_key_pair = new anchor.web3.Keypair();
+    const walletWrapper = new anchor.Wallet(dummy_key_pair);
+    const { candyMachine, goLiveDate, itemsRemaining } =
+      await getCandyMachineState(
+        walletWrapper,
+        candyMachineId,
+        connection
+      );
+    console.log({ candyMachine, goLiveDate, itemsRemaining })
 
 
-    // Get the buyer's USDC token account address
-    const buyerUsdcAddress = await getAssociatedTokenAddress(usdcAddress, buyerPublicKey)
-    const senderAccount = await getAccount(connection, buyerUsdcAddress);
+    //Get minting instructions and signers
+    const mintInstructions = await mintToken(candyMachine, buyerPublicKey, reference as string);
+    console.log({ mintInstructions })
 
-    // Get the merchant's ATA and check that the account exists and can receive tokens
-    const shopUsdcAddress = await getAssociatedTokenAddress(usdcAddress, shopPublicKey);
-    const merchantAccount = await getAccount(connection, shopUsdcAddress);
-    if (!merchantAccount.isInitialized) throw new Error('merchant not initialized');
-    if (merchantAccount.isFrozen) throw new Error('merchant frozen');
-    // Get the shop's USDC token account address
-    //const shopUsdcAddress = await getAssociatedTokenAddress(usdcAddress, shopPublicKey)
-    // Get details about the USDC token
-    const usdcMint = await getMint(connection, usdcAddress)
-    if (!usdcMint.isInitialized) throw new Error('mint not initialized');
-    //amount = amount.times(TEN.pow(mint.decimals)).integerValue(BigNumber.ROUND_FLOOR);
-    // Check that the sender has enough tokens
-    const tokens = BigInt(String(amount));
-    if (tokens > senderAccount.amount) throw new Error('insufficient funds');
+    //minting instructions
+    const instructions: any = mintInstructions?.instructions;
+
+    //transaction signers
+    const signers: any = mintInstructions?.signers;
+
+    // @ts-ignore
+    //transfer request
+    const transferIx = SystemProgram.transfer({
+      fromPubkey: buyerPublicKey,
+      toPubkey: new anchor.web3.PublicKey("FAB3hkxzNtgPttqE9hMyMPdh7hoFLQB4WBNBy9SbF3gB"), //wallet that receives the payment
+      lamports: 0.5 * anchor.web3.LAMPORTS_PER_SOL, //transfer amount
+    })
+
     // Get a recent blockhash to include in the transaction
     const { blockhash } = await (connection.getLatestBlockhash('finalized'))
 
@@ -148,61 +129,19 @@ async function post(
       feePayer: buyerPublicKey,
     })
 
-    // If the buyer has the coupon discount, divide the amount in USDC by 2
-    const amountToPay = amount //buyerGetsCouponDiscount ? amount.dividedBy(2) : amount
+    console.log("INX", instructions);
 
-    // Create the instruction to send USDC from the buyer to the shop
-    const transferInstruction = createTransferCheckedInstruction(
-      buyerUsdcAddress, // source
-      usdcAddress, // mint (token address)
-      shopUsdcAddress, // destination
-      buyerPublicKey, // owner of source address
-      amountToPay, // amount to transfer (in units of the USDC token)
-      usdcMint.decimals, // decimals of the USDC token
-    )
+    transaction.add(transferIx)
+    transaction.add(...instructions);//console.log(instruction))//
 
-    // Add the reference to the instruction as a key
-    // This will mean this transaction is returned when we query for the reference
-    transferInstruction.keys.push({
-      pubkey: new PublicKey(reference),
-      isSigner: false,
-      isWritable: false,
-    })
 
-    // Minting code
-    const walet = new PublicKey(account)
-    const anchorWallet = {
-      publicKey: walet
-    } as anchor.Wallet;
-    const { candyMachine, goLiveDate, itemsRemaining } =
-      await getCandyMachineState(
-          anchorWallet,
-          candyMachineId,
-          connection
-      );
-      const mintInstructions = await mintToken(candyMachine, walet);
-    //* /console.log(mintInstructions);
-    const instructions: any = mintInstructions?.instructionsMatrix;
-    const signers: any = mintInstructions?.signersMatrix;
-    // Create the instruction to send the NFT from the shop to the buyer
-    const unsignedTxns: Transaction[] = []; 
-    // Add both instructions to the transaction
-    transaction.add(transferInstruction)
-    //console.log(mintInstructions[0][0]);
-    instructions[0].forEach((instruction: any) => transaction.add(instruction));//console.log(instruction))//
-    
-
-    /* unsignedTxns.push(transaction);
-    const signedTxns = await anchorWallet.signAllTransactions(unsignedTxns); */
-    // Sign the transaction as the shop, which is required to transfer the coupon
-    // We must partial sign because the transfer instruction still requires the user
-    //transaction.partialSign(shopKeypair)
+    transaction.partialSign(...signers);
 
     // Serialize the transaction and convert to base64 to return it
     const serializedTransaction = transaction.serialize({
-      // We will need the buyer to sign this transaction after it's returned to them
       requireAllSignatures: false
     })
+
     const base64 = serializedTransaction.toString('base64')
 
     // Insert into database: reference, amount
@@ -210,10 +149,10 @@ async function post(
     const message = "Thanks for your order!"
 
     // Return the serialized transaction
-    res.status(200).json({
+    return res.status(200).json({
       transaction: base64,
       message,
-    }) 
+    })
   } catch (err) {
     console.error(err);
 

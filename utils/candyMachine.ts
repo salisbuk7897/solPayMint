@@ -19,6 +19,61 @@ const SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID = new PublicKey(
     "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
 );
 
+const CIVIC = new PublicKey(
+    'gatem74V238djXdzWnJf94Wo1DcnuGkfijbf3AuBhfs',
+);
+
+const getNetworkToken = async (payer: anchor.web3.PublicKey, gatekeeperNetwork: any) => {
+    return await anchor.web3.PublicKey.findProgramAddress(
+        [
+            payer.toBuffer(),
+            Buffer.from('gateway'),
+            Buffer.from([0, 0, 0, 0, 0, 0, 0, 0]),
+            gatekeeperNetwork.toBuffer(),
+        ],
+        CIVIC,
+    );
+};
+
+export interface CollectionData {
+    mint: anchor.web3.PublicKey;
+    candyMachine: anchor.web3.PublicKey;
+}
+
+const getNetworkExpire = async (gatekeeperNetwork: any) => {
+    return await anchor.web3.PublicKey.findProgramAddress(
+        [gatekeeperNetwork.toBuffer(), Buffer.from('expire')],
+        CIVIC,
+    );
+};
+
+export const getCollectionAuthorityRecordPDA = async (
+    mint: anchor.web3.PublicKey,
+    newAuthority: anchor.web3.PublicKey,
+): Promise<anchor.web3.PublicKey> => {
+    return (
+        await anchor.web3.PublicKey.findProgramAddress(
+            [
+                Buffer.from('metadata'),
+                TOKEN_METADATA_PROGRAM_ID.toBuffer(),
+                mint.toBuffer(),
+                Buffer.from('collection_authority'),
+                newAuthority.toBuffer(),
+            ],
+            TOKEN_METADATA_PROGRAM_ID,
+        )
+    )[0];
+};
+
+export const getCollectionPDA = async (
+    candyMachineAddress: anchor.web3.PublicKey,
+): Promise<[anchor.web3.PublicKey, number]> => {
+    return await anchor.web3.PublicKey.findProgramAddress(
+        [Buffer.from('collection'), candyMachineAddress.toBuffer()],
+        CANDY_MACHINE_PROGRAM,
+    );
+};
+
 const { SystemProgram } = anchor.web3;
 
 /**
@@ -262,18 +317,17 @@ export const mintMultipleToken = async (
 
 export const mintToken = async (
     candyMachine: any,
-    payer: anchor.web3.PublicKey
+    payer: anchor.web3.PublicKey,
+    reference: string
 ) => {
     try {
-        const signersMatrix = [];
-        const instructionsMatrix = [];
-
         const mint = anchor.web3.Keypair.generate();
-        const token = await getTokenWallet(payer, mint.publicKey);
+        const userTokenAccountAddress = await getTokenWallet(payer, mint.publicKey);
         const { connection } = candyMachine;
         const rent = await connection.getMinimumBalanceForRentExemption(
             MintLayout.span
         );
+        console.log("MINT:", mint)
         const instructions = [
             anchor.web3.SystemProgram.createAccount({
                 fromPubkey: payer,
@@ -290,20 +344,21 @@ export const mintToken = async (
                 TOKEN_PROGRAM_ID,
             ),
             createAssociatedTokenAccountInstruction(
-                token,
+                userTokenAccountAddress,
                 payer,
                 payer,
                 mint.publicKey
             ),
             createMintToInstruction(
                 mint.publicKey,
-                token,
+                userTokenAccountAddress,
                 payer,
-                0, // fee to pay
+                1,
                 [],
                 TOKEN_PROGRAM_ID,
             ),
         ];
+
         const masterEdition = await getMasterEdition(mint.publicKey);
         const metadata = await getMetadata(mint.publicKey);
 
@@ -337,12 +392,66 @@ export const mintToken = async (
             instruction
         );
 
+        const [collectionPDA] = await getCollectionPDA(candyMachine.id);
+        const collectionPDAAccount =
+            await candyMachine.program.provider.connection.getAccountInfo(
+                collectionPDA
+            );
+
+        if (collectionPDAAccount && candyMachine.state.retainAuthority) {
+            try {
+                const collectionData =
+                    (await candyMachine.program.account.collectionPda.fetch(
+                        collectionPDA
+                    )) as CollectionData;
+                console.log(collectionData);
+                const collectionMint = collectionData.mint;
+                const collectionAuthorityRecord = await getCollectionAuthorityRecordPDA(
+                    collectionMint,
+                    collectionPDA
+                );
+                console.log(collectionMint);
+                if (collectionMint) {
+                    const collectionMetadata = await getMetadata(collectionMint);
+                    const collectionMasterEdition = await getMasterEdition(
+                        collectionMint
+                    );
+
+                    const setCollectionInst =
+                        await candyMachine.program.instruction.setCollectionDuringMint({
+                            accounts: {
+                                candyMachine: candyMachine.id,
+                                metadata,
+                                payer: payer,
+                                collectionPda: collectionPDA,
+                                tokenMetadataProgram: TOKEN_METADATA_PROGRAM_ID,
+                                instructions: anchor.web3.SYSVAR_INSTRUCTIONS_PUBKEY,
+                                collectionMint,
+                                collectionMetadata,
+                                collectionMasterEdition,
+                                authority: candyMachine.state.authority,
+                                collectionAuthorityRecord,
+                            },
+                        });
+
+                    setCollectionInst.keys.push({
+                        pubkey: new PublicKey(reference),
+                        isSigner: false,
+                        isWritable: false,
+                    });
+
+                    instructions.push(setCollectionInst);
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+
+
         const signers: anchor.web3.Keypair[] = [mint];
 
-
-        signersMatrix.push(signers);
-        instructionsMatrix.push(instructions)
-        return{instructionsMatrix, signersMatrix};
+        return { instructions, signers };
     } catch (err) {
         console.log(err)
     }

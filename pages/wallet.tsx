@@ -1,19 +1,23 @@
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { Keypair, Transaction } from "@solana/web3.js";
-import { useRouter } from "next/router";
-import { useEffect, useMemo, useState } from "react";
-import { TransactionInputData, TransactionOutputData } from "../pages/api/transaction";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { findReference, FindReferenceError } from "@solana/pay";
 import * as anchor from "@project-serum/anchor";
+
 import {
     CandyMachine,
-    getCandyMachineState,
     awaitTransactionSignatureConfirmation,
+    getCandyMachineState,
     mintMultipleToken
 } from "../utils";
+import { FindReferenceError, findReference } from "@solana/pay";
+import { Keypair, Transaction } from "@solana/web3.js";
+import { TransactionInputData, TransactionOutputData } from "../pages/api/transaction";
+import { useConnection, useWallet } from "@solana/wallet-adapter-react";
+import { useEffect, useMemo, useState } from "react";
+
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { sendTransactions } from "../utils/candyMachine.helpers";
 import { sleep } from "../utils";
+import { useRouter } from "next/router";
+
 const MINT_PRICE_SOL = 0;
 const txTimeout = 50000;
 const candyMachineId = new anchor.web3.PublicKey(
@@ -22,7 +26,7 @@ const candyMachineId = new anchor.web3.PublicKey(
 
 const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
 const anchorConnection = new anchor.web3.Connection(rpcHost);
-import { sendTransactions } from "../utils/candyMachine.helpers";
+
 
 export default function wallet(){
     console.log("in wallet");
