@@ -63,11 +63,19 @@ async function post(
     console.log("in transaction")
     console.log(req.query.amount)
 
-    let amount = parseFloat(req.query.amount as string) / 10//Object.entries(req.query)
+    let amount = parseFloat(req.query.amount as string)//Object.entries(req.query)
     if (amount <= 0) {
       res.status(400).json({ error: "Can't mint with charge of 0" })
       return
     }
+
+    const { shop } = req.query
+    if (!shop) {
+      res.status(400).json({ error: "No shop public key provided" })
+      return
+    }
+
+    //console.log(`Price: ${amount}, shop: ${shop}`)
 
     // We pass the reference to use in the query
     // Unique address that we can listen for payments to
@@ -99,12 +107,12 @@ async function post(
         candyMachineId,
         connection
       );
-    console.log({ candyMachine, goLiveDate, itemsRemaining })
+    //console.log({ candyMachine, goLiveDate, itemsRemaining })
 
 
     //Get minting instructions and signers
     const mintInstructions = await mintToken(candyMachine, buyerPublicKey, reference as string);
-    console.log({ mintInstructions })
+    //console.log({ mintInstructions })
 
     //minting instructions
     const instructions: any = mintInstructions?.instructions;
@@ -116,9 +124,15 @@ async function post(
     //transfer request
     const transferIx = SystemProgram.transfer({
       fromPubkey: buyerPublicKey,
-      toPubkey: new anchor.web3.PublicKey("FAB3hkxzNtgPttqE9hMyMPdh7hoFLQB4WBNBy9SbF3gB"), //wallet that receives the payment
-      lamports: 0.5 * anchor.web3.LAMPORTS_PER_SOL, //transfer amount
+      toPubkey: new anchor.web3.PublicKey(shop), //wallet that receives the payment
+      lamports: amount * anchor.web3.LAMPORTS_PER_SOL, //transfer amount
     })
+
+    transferIx.keys.push({
+      pubkey: new PublicKey(reference),
+      isSigner: false,
+      isWritable: false,
+    }) 
 
     // Get a recent blockhash to include in the transaction
     const { blockhash } = await (connection.getLatestBlockhash('finalized'))
@@ -129,7 +143,7 @@ async function post(
       feePayer: buyerPublicKey,
     })
 
-    console.log("INX", instructions);
+    //console.log("INX", instructions);
 
     transaction.add(transferIx)
     transaction.add(...instructions);//console.log(instruction))//

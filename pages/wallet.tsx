@@ -6,8 +6,9 @@ import {
     getCandyMachineState,
     mintMultipleToken
 } from "../utils";
-import { FindReferenceError, findReference } from "@solana/pay";
-import { Keypair, Transaction } from "@solana/web3.js";
+import BigNumber from 'bignumber.js';
+import { FindReferenceError, findReference, validateTransfer } from "@solana/pay";
+import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import { TransactionInputData, TransactionOutputData } from "../pages/api/transaction";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useMemo, useState } from "react";
@@ -33,6 +34,8 @@ export default function wallet(){
     const router = useRouter();
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
+    let NFTamount = 0;
+    let shop = "";
     // State to hold API response fields
     const [transaction, setTransaction] = useState<Transaction | null>(null);
     //const [signers, setSigners] = useState([]);
@@ -41,59 +44,9 @@ export default function wallet(){
     const [price, setPrice] = useState(0);
     const [treasury, setTreasury] = useState("");
     const [candyMachine, setCandyMachine] = useState<CandyMachine>();
-    /* const [mintStartDate, setMintStartDate] = useState(
-        new Date(parseInt(process.env.NEXT_PUBLIC_CANDY_START_DATE!, 10))
-    );
-    const [candyMachine, setCandyMachine] = useState<CandyMachine>();
-    const [nftsData, setNftsData] = useState<any>(
-        ({} = {
-            itemsRemaining: 0,
-            itemsRedeemed: 0,
-            itemsAvailable: 0,
-            price: 0,
-            treasury: "",
-        } as any)
-    ); */
-    /* useEffect(() => {
-        try{
-            (async () => {
-                const anchorWallet = {
-                    publicKey: wallet.publicKey
-                } as anchor.Wallet;
-    
-                const data =
-                    await getCandyMachineState(
-                        anchorWallet,
-                        candyMachineId,
-                        anchorConnection
-                    );
-                const { itemsRemaining, itemsRedeemed, itemsAvailable, candyMachine } = data
-                const price = candyMachine.state.data.price
-                const treasury = candyMachine.state.wallet
-                setPrice(price/LAMPORTS_PER_SOL);
-                setTreasury(treasury);
-                //console.log(`Price: ${price/LAMPORTS_PER_SOL}, treasury: ${treasury}`)
-            })();
-        }catch(e){
-            console.log(e)
-        }
-        
-    }, [wallet, candyMachineId, anchorConnection]); */
 
     // Read the URL query (which includes our chosen products)
     const searchParams = new URLSearchParams();
-    /*for (const [key, value] of Object.entries(router.query)) {
-        if (value) {
-        if (Array.isArray(value)) {
-            for (const v of value) {
-            searchParams.append(key, v);
-            }
-        } else {
-            searchParams.append(key, value);
-        }
-        }
-    } */
-
 
     // Generate the unique reference which will be used for this transaction
     const reference = useMemo(() => Keypair.generate().publicKey, []);
@@ -122,8 +75,11 @@ export default function wallet(){
             );
         const { itemsRemaining, itemsRedeemed, itemsAvailable, candyMachine } = data
         const candyprice = candyMachine.state.data.price
-        const NFTprice = candyprice
-        searchParams.append('amount', NFTprice.toString())
+        NFTamount = candyprice/LAMPORTS_PER_SOL
+        shop = candyMachine.state.wallet
+        //console.log(`Price: ${NFTprice}, treasury: ${treasury}`)
+        searchParams.append('amount', NFTamount.toString())
+        searchParams.append('shop', shop.toString())
         const response = await fetch(`/api/transaction?${searchParams.toString()}`, { 
             method: 'POST',
             headers: {
@@ -170,56 +126,19 @@ export default function wallet(){
 
     useEffect(() => {
         const interval = setInterval(async () => {
-        /* try {
+        try {
             // Check if there is any transaction for the reference
             const signatureInfo = await findReference(connection, reference);
-            const anchorWallet = {
-                publicKey: wallet.publicKey,
-                signAllTransactions: wallet.signAllTransactions,
-                signTransaction: wallet.signTransaction,
-            } as anchor.Wallet;
-              const { candyMachine, goLiveDate, itemsRemaining } =
-                await getCandyMachineState(
-                    anchorWallet,
-                    candyMachineId,
-                    connection
-                );
-                try {
-                    if (wallet.connected && candyMachine?.program && wallet.publicKey) {
-                        const oldBalance =
-                            (await connection.getBalance(wallet?.publicKey)) /
-                            LAMPORTS_PER_SOL;
-                        const futureBalance = oldBalance - MINT_PRICE_SOL * 1;
-        
-                        const signedTransactions: any = await mintMultipleToken(
-                            candyMachine,
-                            wallet.publicKey,
-                            1
-                        );
-        
-                        
-                    }
-                    console.log("DONE")
-                } catch (error: any) {
-                    let message = error.message || "Minting failed! Please try again!";
-                    if (!error.message) {
-                        if (error.message.indexOf("0x138")) {
-                        } else if (error.message.indexOf("0x137")) {
-                            message = `SOLD OUT!`;
-                        } else if (error.message.indexOf("0x135")) {
-                            message = `Insufficient funds to mint. Please fund your wallet.`;
-                        }
-                    } else {
-                        if (error.code === 311) {
-                            message = `SOLD OUT!`;
-                        } else if (error.code === 312) {
-                            message = `Minting period hasn't started yet.`;
-                        }
-                    }
-                } finally {
-                    
-                }
-            //console.log('They paid!!!')
+            const amount: BigNumber = new BigNumber(NFTamount)
+            await validateTransfer(
+                connection,
+                signatureInfo.signature,
+                {
+                  recipient: new PublicKey(shop),
+                  amount
+                },
+                { commitment: 'confirmed' }
+              )
             router.push('/confirmed')
         } catch (e) {
             if (e instanceof FindReferenceError) {
@@ -227,7 +146,7 @@ export default function wallet(){
             return;
             }
             console.error('Unknown error', e)
-        } */
+        } 
         }, 500)
         return () => {
         clearInterval(interval)

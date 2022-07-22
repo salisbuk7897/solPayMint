@@ -327,7 +327,7 @@ export const mintToken = async (
         const rent = await connection.getMinimumBalanceForRentExemption(
             MintLayout.span
         );
-        console.log("MINT:", mint)
+        //console.log("MINT:", mint)
         const instructions = [
             anchor.web3.SystemProgram.createAccount({
                 fromPubkey: payer,
