@@ -43,7 +43,7 @@ type ErrorOutput = {
   error: string
 }
 
-const candyMachineId = new anchor.web3.PublicKey(
+export const candyMachineId = new anchor.web3.PublicKey(
   process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
 );
 
@@ -132,7 +132,7 @@ async function post(
       pubkey: new PublicKey(reference),
       isSigner: false,
       isWritable: false,
-    }) 
+    })
 
     // Get a recent blockhash to include in the transaction
     const { blockhash } = await (connection.getLatestBlockhash('finalized'))
