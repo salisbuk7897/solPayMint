@@ -1,9 +1,45 @@
-import React, {useState} from "react";
-import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import * as anchor from "@project-serum/anchor";
+
+import { CandyMachine, getCandyMachineState } from "../utils";
+import React, {useEffect, useState} from "react";
+
 import Modal from "../components/modal";
+import NtfData  from "./nft"
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { useWallet } from "@solana/wallet-adapter-react";
+
+const candyMachineId = new anchor.web3.PublicKey(
+  process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
+);
 
 export default function Homepg() {
   const [showpo, setShowpo] = useState(false);
+  const wallet = useWallet();
+  const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
+const connection = new anchor.web3.Connection(rpcHost);
+  const [candyMachine, setCandyMachine] = useState<CandyMachine>();
+  useEffect(() => {
+    try{
+      (async () => {
+        const anchorWallet = {
+            publicKey: wallet.publicKey
+        } as anchor.Wallet;
+
+        const data =
+            await getCandyMachineState(
+                anchorWallet,
+                candyMachineId,
+                connection
+            );
+        const { candyMachine } = data
+        setCandyMachine(candyMachine)
+        console.log({candyMachine})
+            })
+    }catch(err){
+      console.log(err)
+    }
+  },[wallet, candyMachineId, connection,])
+
   return (
     <div className="flex w-full justify-center items-center">
       <div className="flex mf:flex-row flex-col items-start justify-between md:p-20 py-12 px-4">
@@ -16,6 +52,7 @@ export default function Homepg() {
           </p>
         </div>
       </div>
+      {<NtfData/>}
       <div className="flex flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-10">
         <div className="grid grid-cols-2 gap-4">
           <div className="basis-1/4">

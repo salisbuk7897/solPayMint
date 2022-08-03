@@ -24,9 +24,14 @@
     "dotenv": "^16.0.1",
     "next": "12.1.6",
     "react": "18.2.0",
+<<<<<<< HEAD
     "react-circular-progressbar": "^2.0.4",
     "react-dom": "18.2.0",
     "tweetnacl": "^1.0.3"
+=======
+    "react-dom": "18.2.0",
+    "react-hot-toast": "^2.2.0"
+>>>>>>> 81576e89795b1d24ee5e4a6f97d0d056f4c0ff61
   },
   "devDependencies": {
     "@types/node": "18.0.0",

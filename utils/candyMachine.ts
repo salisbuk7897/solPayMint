@@ -312,7 +312,6 @@ export const mintMultipleToken = async (
     } catch (err) {
         console.log(err)
     }
-
 };
 
 export const candyAnchorWallet =() => {

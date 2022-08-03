@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/rules-of-hooks */
+
 import * as anchor from "@project-serum/anchor";
 
 import {
@@ -7,7 +9,6 @@ import {
 import { useEffect, useState } from "react";
 
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { sleep } from "../utils";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 const candyMachineId = new anchor.web3.PublicKey(
@@ -51,7 +52,7 @@ export default function candy(){
                         candyMachineId,
                         connection
                     );
-                const { itemsRemaining, itemsRedeemed, itemsAvailable, candyMachine } = data
+                const { candyMachine, } = data
                 const price = candyMachine.state.data.price
                 const treasury = candyMachine.state.wallet
                 setPrice(price/LAMPORTS_PER_SOL);
