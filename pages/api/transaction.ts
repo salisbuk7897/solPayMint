@@ -21,9 +21,7 @@ import { WalletAdapterNetwork } from "@solana/wallet-adapter-base"
 import base58 from 'bs58'
 import { sendTransactions } from "../../utils/candyMachine.helpers";
 import { useWallet } from "@solana/wallet-adapter-react";
-
-// This is your token/coupon address
-const usdcAddress = new PublicKey('Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr')
+import * as nacl from "tweetnacl";
 
 export type TransactionInputData = {
   account: string,
@@ -145,16 +143,33 @@ async function post(
 
     //console.log("INX", instructions);
 
-    transaction.add(transferIx)
+    transaction.add(transferIx) // Payment Instructions
     transaction.add(...instructions);//console.log(instruction))//
 
-
+   
+    //const pkey = 
+    //console.log(signers[0]["_keypair"])
+    const mintPublicKey = signers[0]["_keypair"]["publicKey"]
+    const mintSecretKey = signers[0]["_keypair"]["secretKey"]
+    //console.log(typeof(signers));
+    
     transaction.partialSign(...signers);
 
     // Serialize the transaction and convert to base64 to return it
     const serializedTransaction = transaction.serialize({
       requireAllSignatures: false
     })
+
+    let mintSignature = nacl.sign.detached(serializedTransaction, mintSecretKey);
+    let verifyMintSignatureResult = nacl.sign.detached.verify(
+      serializedTransaction,
+      mintSignature,
+      mintPublicKey // you should use the raw pubkey (32 bytes) to verify
+    );
+    console.log(`verify Mint Account signature: ${verifyMintSignatureResult}`);
+    //console.log(`Transaction: ${mintSignature}`)
+
+
 
     const base64 = serializedTransaction.toString('base64')
 

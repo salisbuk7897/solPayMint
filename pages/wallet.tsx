@@ -18,6 +18,7 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { sendTransactions } from "../utils/candyMachine.helpers";
 import { sleep } from "../utils";
 import { useRouter } from "next/router";
+import * as nacl from "tweetnacl";
 
 const MINT_PRICE_SOL = 0;
 const txTimeout = 50000;
@@ -41,9 +42,6 @@ export default function wallet(){
     //const [signers, setSigners] = useState([]);
     const [message, setMessage] = useState<string | null>(null);
     const wallet = useWallet();
-    const [price, setPrice] = useState(0);
-    const [treasury, setTreasury] = useState("");
-    const [candyMachine, setCandyMachine] = useState<CandyMachine>();
 
     // Read the URL query (which includes our chosen products)
     const searchParams = new URLSearchParams();
@@ -78,8 +76,8 @@ export default function wallet(){
         NFTamount = candyprice/LAMPORTS_PER_SOL
         shop = candyMachine.state.wallet
         //console.log(`Price: ${NFTprice}, treasury: ${treasury}`)
-        searchParams.append('amount', NFTamount.toString())
-        searchParams.append('shop', shop.toString())
+        searchParams.toString().includes("amount") ? "" : searchParams.append('amount', NFTamount.toString())
+        searchParams.toString().includes("shop") ? "" : searchParams.append('shop', shop.toString())
         const response = await fetch(`/api/transaction?${searchParams.toString()}`, { 
             method: 'POST',
             headers: {
@@ -113,7 +111,18 @@ export default function wallet(){
         return;
         }
         try {
-            await sendTransaction(transaction, connection)
+            const walletSignature = await sendTransaction(transaction, connection)
+            //const signatureStatus = await connection.getSignatureStatus(walletSignature)
+            //console.log(signatureStatus)
+            //console.log(signatureStatus?.value)
+            //let buyerSignature = nacl.sign.detached(transaction.serialize(), wallet.);
+            /* let verifybuyerSignatureResult = nacl.sign.detached.verify(
+                transaction.serialize(),
+                walletSignature,
+                publicKey
+              );
+              console.log(`verify Wallet Account signature: ${verifybuyerSignatureResult}`); */
+            //console.log(`Wallet: ${walletSignature}`)
         } catch (e) {
             console.error(e)
         }

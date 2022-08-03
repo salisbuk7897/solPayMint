@@ -315,6 +315,13 @@ export const mintMultipleToken = async (
 
 };
 
+export const candyAnchorWallet =() => {
+    const dummy_key_pair = new anchor.web3.Keypair();
+    const walletWrapper = new anchor.Wallet(dummy_key_pair);
+    return({walletWrapper})
+}
+    
+
 export const mintToken = async (
     candyMachine: any,
     payer: anchor.web3.PublicKey,
@@ -446,9 +453,7 @@ export const mintToken = async (
                 console.error(error);
             }
         }
-
-
-
+        
         const signers: anchor.web3.Keypair[] = [mint];
 
         return { instructions, signers };
