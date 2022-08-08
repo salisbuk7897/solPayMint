@@ -84,7 +84,7 @@ export default function Qrcode() {
         //console.log(`Price: ${NFTprice}, treasury: ${treasury}`)
         searchParams.toString().includes("amount") ? "" : searchParams.append("amount", NFTamount.toString());
         searchParams.toString().includes("shop") ? "" :searchParams.append("shop", shop.toString());
-        console.log(searchParams.toString().includes("amount"))
+        //console.log(searchParams.toString().includes("amount"))
         // window.location is only available in the browser, so create the URL in here
         const { location } = window;
         const apiUrl = `${location.protocol}//${

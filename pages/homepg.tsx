@@ -51,8 +51,12 @@ const connection = new anchor.web3.Connection(rpcHost);
             Mint and Validate NFTs using Solana Pay! 
           </p>
         </div>
+        <div>
+          <br />
+          {<NtfData/>}
+        </div>
       </div>
-      {<NtfData/>}
+      
       <div className="flex flex-col flex-1 items-center justify-start w-full mf:mt-0 mt-10">
         <div className="grid grid-cols-2 gap-4">
           <div className="basis-1/4">

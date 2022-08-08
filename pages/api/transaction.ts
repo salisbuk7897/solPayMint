@@ -35,6 +35,9 @@ type TransactionGetResponse = {
 export type TransactionOutputData = {
   transaction: string,
   message: string,
+  mintSignature : Uint8Array,
+  mintPublicKey : Uint8Array,
+  verifyMintSignatureResult: boolean
 }
 
 type ErrorOutput = {
@@ -160,14 +163,14 @@ async function post(
       requireAllSignatures: false
     })
 
-    let mintSignature = nacl.sign.detached(serializedTransaction, mintSecretKey);
-    let verifyMintSignatureResult = nacl.sign.detached.verify(
+    const mintSignature = nacl.sign.detached(serializedTransaction, mintSecretKey);
+    const verifyMintSignatureResult = nacl.sign.detached.verify(
       serializedTransaction,
       mintSignature,
       mintPublicKey // you should use the raw pubkey (32 bytes) to verify
     );
-    console.log(`verify Mint Account signature: ${verifyMintSignatureResult}`);
-    //console.log(`Transaction: ${mintSignature}`)
+    //console.log(serializedTransaction)
+    //console.log(mintPublicKey)
 
 
 
@@ -181,10 +184,12 @@ async function post(
     return res.status(200).json({
       transaction: base64,
       message,
+      mintSignature,
+      mintPublicKey,
+      verifyMintSignatureResult
     })
   } catch (err) {
     console.error(err);
-
     res.status(500).json({ error: 'error creating transaction', })
     return
   }
