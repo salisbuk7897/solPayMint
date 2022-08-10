@@ -98,12 +98,10 @@ async function post(
     if (itemsRemaining === 0) {
       return res.status(400).json({ error: "Insufficient Nfts to mint" });
     }
-    //console.log({ candyMachine, goLiveDate, itemsRemaining })
 
 
     //Get minting instructions and signers
     const mintInstructions = await mintToken(candyMachine, buyerPublicKey, reference as string);
-    //console.log({ mintInstructions })
 
     //minting instructions
     const instructions: any = mintInstructions?.instructions;
@@ -141,10 +139,8 @@ async function post(
 
 
     //const pkey = 
-    //console.log(signers[0]["_keypair"])
     const mintPublicKey = signers[0]["_keypair"]["publicKey"]
     const mintSecretKey = signers[0]["_keypair"]["secretKey"]
-    //console.log(typeof(signers));
 
     transaction.partialSign(...signers);
 
@@ -160,10 +156,6 @@ async function post(
       mintSignature,
       mintPublicKey // you should use the raw pubkey (32 bytes) to verify
     );
-    //console.log(serializedTransaction)
-    //console.log(mintPublicKey)
-
-
 
     const base64 = serializedTransaction.toString('base64')
 
