@@ -9,9 +9,9 @@ import {
     getCandyMachineState,
     mintMultipleToken
 } from "../utils";
+import { ErrorOutput, TransactionInputData, TransactionOutputData } from "../pages/api/transaction";
 import { FindReferenceError, findReference, validateTransfer } from "@solana/pay";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
-import { TransactionInputData, TransactionOutputData } from "../pages/api/transaction";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -102,9 +102,9 @@ export default function wallet(){
                 },
                 body: JSON.stringify(body),
             })
-            console.log("WALLET",{ response: response.body })
 
-            const json = await response.json() as TransactionOutputData
+            const json: TransactionOutputData = await response.json() as any
+            console.log("WALLET",{ response: json })
 
             if (response.status !== 200) {
                 console.error(json);

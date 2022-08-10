@@ -27,7 +27,7 @@ export type TransactionOutputData = {
   verifyMintSignatureResult: boolean
 }
 
-type ErrorOutput = {
+export type ErrorOutput = {
   error: string
 }
 
@@ -96,7 +96,7 @@ async function post(
         connection
       );
     if (itemsRemaining === 0) {
-      return res.status(400).json({ error: "You do not have nfts to mint" });
+      return res.status(400).json({ error: "Insufficient Nfts to mint" });
     }
     //console.log({ candyMachine, goLiveDate, itemsRemaining })
 
