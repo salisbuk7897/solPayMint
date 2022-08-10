@@ -1,15 +1,6 @@
 import * as anchor from "@project-serum/anchor";
 
-import { createQR, encodeURL, TransactionRequestURLFields } from "@solana/pay";
-
-import {
-  CandyMachine,
-  awaitTransactionSignatureConfirmation,
-  getCandyMachineState,
-  mintMultipleToken,
-  candyAnchorWallet,
-} from "../utils";
-import BigNumber from "bignumber.js";
+import { Connection, clusterApiUrl } from "@solana/web3.js";
 import {
   FindReferenceError,
   findReference,
@@ -20,13 +11,16 @@ import {
   TransactionInputData,
   TransactionOutputData,
 } from "../pages/api/transaction";
+import { TransactionRequestURLFields, createQR, encodeURL } from "@solana/pay";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
+import BigNumber from "bignumber.js";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
-
-import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import {
+  getCandyMachineState,
+} from "../utils";
 import { useRouter } from "next/router";
 
 const candyMachineId = new anchor.web3.PublicKey(
