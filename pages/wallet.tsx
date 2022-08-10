@@ -2,25 +2,19 @@
 
 import * as anchor from "@project-serum/anchor";
 
-import {
-    CandyMachine,
-    awaitTransactionSignatureConfirmation,
-    getCandyMachineState,
-    mintMultipleToken
-} from "../utils";
-import BigNumber from 'bignumber.js';
-import { FindReferenceError, findReference, validateTransfer } from "@solana/pay"; 
+import { FindReferenceError, findReference, validateTransfer } from "@solana/pay";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import { TransactionInputData, TransactionOutputData } from "../pages/api/transaction";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useMemo, useState } from "react";
 
+import BigNumber from 'bignumber.js';
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { sendTransactions } from "../utils/candyMachine.helpers";
-import { sleep } from "../utils";
+import {
+    getCandyMachineState,
+} from "../utils";
 import { useRouter } from "next/router";
-import * as nacl from "tweetnacl";
 
 const candyMachineId = new anchor.web3.PublicKey(
     process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
@@ -35,29 +29,18 @@ export default function wallet(){
     const router = useRouter();
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
-    //const [NFTamount, setNFTamount] = useState<number>(0);
-    //const [shop, setShop] = useState<string>("");
     let NFTamount = 0;
-    //const [balanceBeforeTransaction, setbalanceBeforeTransaction] = useState<number>(0);
-    //const [balanceAfterTransaction, setbalanceAfterTransaction] = useState<number>(0);
     let balanceBeforeTransaction = useState<number>(0);
     let balanceAfterTransaction = 0
     let shop = "";
     // State to hold API response fields
     const [message, setMessage] = useState<string | null>(null);
     const [transaction, setTransaction] = useState<Transaction | null>(null)
-    /* const [transaction, setTransaction] = useState<Transaction | null>(null);
-    const [serializedTransaction, setSerializedTransaction] = useState<any | null>(null);
-    const [mintPublicKey, setMintPublic] = useState<any | null>(null);
-    const [mintSignature, setMintSignature] = useState<Uint8Array>();  */
-    //const transaction = useState<Transaction | null>(null);
-    //const message = useState<string | null>(null);
     const serializedTransaction = useState<Buffer>();
     const mintPublicKey = useState<Uint8Array>();
     const mintSignature = useState<Uint8Array>(); 
     const verifyMintSignatureResult = useState<boolean | null>(null);
     const wallet = useWallet();
-    //console.log(`amount: ${NFTamount}, message: ${message}, bbt: ${balanceBeforeTransaction}, bat: ${balanceAfterTransaction}, `)
 
     // Read the URL query (which includes our chosen products)
     const searchParams = new URLSearchParams();
@@ -87,11 +70,11 @@ export default function wallet(){
                         candyMachineId,
                         anchorConnection
                     );
-            const { itemsRemaining, itemsRedeemed, itemsAvailable, candyMachine } = data
+            const { candyMachine } = data
             const candyprice = candyMachine.state.data.price
             NFTamount= candyprice/LAMPORTS_PER_SOL
             shop= candyMachine.state.wallet
-            //console.log(`Price: ${NFTprice}, treasury: ${treasury}`)
+            
             searchParams.toString().includes("amount") ? "" : searchParams.append('amount', NFTamount.toString())
             searchParams.toString().includes("shop") ? "" : searchParams.append('shop', shop.toString())
 
@@ -103,7 +86,8 @@ export default function wallet(){
                 body: JSON.stringify(body),
             })
 
-            const json = await response.json() as TransactionOutputData
+            const json: TransactionOutputData = await response.json() as any
+            console.log("WALLET",{ response: json })
 
             if (response.status !== 200) {
                 console.error(json);
@@ -113,7 +97,7 @@ export default function wallet(){
             // Deserialize the transaction from the response
             const deserializedTransaction = Transaction.from(Buffer.from(json.transaction, 'base64'));
             setTransaction(deserializedTransaction);
-            //setSigners(json.signers);
+
             setMessage(json.message);
             mintPublicKey[0] = json.mintPublicKey;
             serializedTransaction[0] = Buffer.from(json.transaction, 'base64');
@@ -123,7 +107,6 @@ export default function wallet(){
         }
         let bbt = (await connection.getBalance(anchorWallet.publicKey)) / LAMPORTS_PER_SOL
         balanceBeforeTransaction[0] = bbt; 
-        //console.log(transaction);
     }
 
     useEffect(() => {
@@ -181,7 +164,6 @@ export default function wallet(){
             console.log(`verify Mint Account signature: ${verifyMintSignatureResult[0]}`);
             router.push({pathname: '/confirmed',
                         query: { token: "SOL" , amount: cost.toFixed(3), sign: `${mintSignature[0]}`, verify: `${verifyMintSignatureResult[0]}` }})
-            //router.push('/confirmed')
         } catch (e) {
             if (e instanceof FindReferenceError) {
             // No transaction found yet, ignore this error
