@@ -1,6 +1,7 @@
 /* eslint-disable */
 
 import * as anchor from "@project-serum/anchor";
+import * as nacl from "tweetnacl";
 
 import {
     CandyMachine,
@@ -8,19 +9,18 @@ import {
     getCandyMachineState,
     mintMultipleToken
 } from "../utils";
-import BigNumber from 'bignumber.js';
-import { FindReferenceError, findReference, validateTransfer } from "@solana/pay"; 
+import { FindReferenceError, findReference, validateTransfer } from "@solana/pay";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import { TransactionInputData, TransactionOutputData } from "../pages/api/transaction";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useMemo, useState } from "react";
 
+import BigNumber from 'bignumber.js';
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { sendTransactions } from "../utils/candyMachine.helpers";
 import { sleep } from "../utils";
 import { useRouter } from "next/router";
-import * as nacl from "tweetnacl";
 
 const candyMachineId = new anchor.web3.PublicKey(
     process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
@@ -102,6 +102,7 @@ export default function wallet(){
                 },
                 body: JSON.stringify(body),
             })
+            console.log("WALLET",{ response: response.body })
 
             const json = await response.json() as TransactionOutputData
 
