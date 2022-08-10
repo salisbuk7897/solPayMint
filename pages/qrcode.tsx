@@ -6,13 +6,8 @@ import {
   findReference,
   validateTransfer,
 } from "@solana/pay";
-import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
-import {
-  TransactionInputData,
-  TransactionOutputData,
-} from "../pages/api/transaction";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import { TransactionRequestURLFields, createQR, encodeURL } from "@solana/pay";
-import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 
 import BigNumber from "bignumber.js";
@@ -65,20 +60,15 @@ export default function Qrcode() {
           candyMachineId,
           anchorConnection
         );
-        console.log("data")
-        const { itemsRemaining, itemsRedeemed, itemsAvailable, candyMachine } =
-        data;
-        //console.log("add data")
+        
+        const {  candyMachine } = data;
         const candyprice = candyMachine.state.data.price;
-        //console.log("cost")
+
         NFTamount = candyprice / LAMPORTS_PER_SOL;
-        //console.log("price")
         shop = candyMachine.state.wallet;
-        //console.log("shop")
-        //console.log(`Price: ${NFTprice}, treasury: ${treasury}`)
         searchParams.toString().includes("amount") ? "" : searchParams.append("amount", NFTamount.toString());
         searchParams.toString().includes("shop") ? "" :searchParams.append("shop", shop.toString());
-        //console.log(searchParams.toString().includes("amount"))
+        
         // window.location is only available in the browser, so create the URL in here
         const { location } = window;
         const apiUrl = `${location.protocol}//${
