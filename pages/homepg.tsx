@@ -6,16 +6,17 @@ import React, {useEffect, useState} from "react";
 import Modal from "../components/modal";
 import NtfData  from "./nft"
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import envConfig from "../config/conf.json";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 const candyMachineId = new anchor.web3.PublicKey(
-  process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
+  process.env.NEXT_PUBLIC_CANDY_MACHINE_ID! || envConfig.candyMachineID
 );
 
 export default function Homepg() {
   const [showpo, setShowpo] = useState(false);
   const wallet = useWallet();
-  const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
+  const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST! || envConfig.rpcHost;
 const connection = new anchor.web3.Connection(rpcHost);
   const [candyMachine, setCandyMachine] = useState<CandyMachine>();
   useEffect(() => {
@@ -33,7 +34,6 @@ const connection = new anchor.web3.Connection(rpcHost);
             );
         const { candyMachine } = data
         setCandyMachine(candyMachine)
-        console.log({candyMachine})
             })
     }catch(err){
       console.log(err)

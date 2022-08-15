@@ -13,16 +13,17 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import BigNumber from "bignumber.js";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import envConfig from "../config/conf.json"
 import {
   getCandyMachineState,
 } from "../utils";
 import { useRouter } from "next/router";
 
 const candyMachineId = new anchor.web3.PublicKey(
-  process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
+  process.env.NEXT_PUBLIC_CANDY_MACHINE_ID! || envConfig.candyMachineID
 );
 
-const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
+const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST! || envConfig.rpcHost;
 const anchorConnection = new anchor.web3.Connection(rpcHost);
 const dummy_key_pair = Keypair.generate();
 const wallet = dummy_key_pair.publicKey;

@@ -9,6 +9,7 @@ import {
 } from "../../utils";
 
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base"
+import envConfig from "../../config/conf.json"
 
 export type TransactionInputData = {
   account: string,
@@ -32,7 +33,7 @@ export type ErrorOutput = {
 }
 
 export const candyMachineId = new anchor.web3.PublicKey(
-  process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
+  process.env.NEXT_PUBLIC_CANDY_MACHINE_ID! || envConfig.candyMachineID
 );
 
 function get(res: NextApiResponse<TransactionGetResponse>) {
@@ -48,9 +49,6 @@ async function post(
 ) {
   try {
 
-    console.log("in transaction")
-    console.log(req.query.amount)
-
     let amount = parseFloat(req.query.amount as string)//Object.entries(req.query)
     if (amount <= 0) {
       res.status(400).json({ error: "Can't mint with charge of 0" })
@@ -62,8 +60,6 @@ async function post(
       res.status(400).json({ error: "No shop public key provided" })
       return
     }
-
-    //console.log(`Price: ${amount}, shop: ${shop}`)
 
     // We pass the reference to use in the query
     // Unique address that we can listen for payments to
@@ -132,10 +128,9 @@ async function post(
       feePayer: buyerPublicKey,
     })
 
-    //console.log("INX", instructions);
 
     transaction.add(transferIx) // Payment Instructions
-    transaction.add(...instructions);//console.log(instruction))//
+    transaction.add(...instructions);
 
 
     //const pkey = 
@@ -148,7 +143,6 @@ async function post(
     const serializedTransaction = transaction.serialize({
       requireAllSignatures: false
     })
-    console.log({ serializedTransaction })
 
     const mintSignature = nacl.sign.detached(serializedTransaction, mintSecretKey);
     const verifyMintSignatureResult = nacl.sign.detached.verify(
