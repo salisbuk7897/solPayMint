@@ -5,10 +5,6 @@ import * as anchor from "@project-serum/anchor";
 import { FindReferenceError, findReference, validateTransfer } from "@solana/pay";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import { TransactionInputData, TransactionOutputData } from "../pages/api/transaction";
-import {
-    getParsedNftAccountsByOwner,
-    resolveToWalletAddress,
-} from "@nfteyez/sol-rayz";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -18,6 +14,9 @@ import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import {
     getCandyMachineState,
 } from "../utils";
+import {
+    getParsedNftAccountsByOwner,
+} from "@nfteyez/sol-rayz";
 import { useRouter } from "next/router";
 
 const candyMachineId = new anchor.web3.PublicKey(
@@ -28,15 +27,15 @@ const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
 const anchorConnection = new anchor.web3.Connection(rpcHost);
 
 export default function wallet(){
-    console.log("in wallet");
+
     const router = useRouter();
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
+
     let NFTamount = 0;
     let balanceBeforeTransaction = useState<number>(0);
     let nftNumberBeforeTransaction = useState<number>(0);
     let balanceAfterTransaction = 0
-    let nftNumbersfterTransaction : number = 0
     let shop = "";
     // State to hold API response fields
     const [message, setMessage] = useState<string | null>(null);
@@ -93,7 +92,6 @@ export default function wallet(){
             })
 
             const json: TransactionOutputData = await response.json() as any
-            console.log("WALLET",{ response: json })
 
             if (response.status !== 200) {
                 console.error(json);
@@ -113,7 +111,7 @@ export default function wallet(){
         }
         let bbt = (await connection.getBalance(anchorWallet.publicKey)) / LAMPORTS_PER_SOL
         balanceBeforeTransaction[0] = bbt; 
-        //console.log(transaction);
+
         const nftArray = await getParsedNftAccountsByOwner({
             publicAddress: publicKey.toString() as string,
             connection: connection
@@ -161,16 +159,16 @@ export default function wallet(){
             balanceAfterTransaction = bat
 
             let cost = balanceBeforeTransaction[0] - balanceAfterTransaction
-            console.log(` Amount Paid: ${cost}`);
+
             const nftArray2 = await getParsedNftAccountsByOwner({
                 publicAddress: publicKey?.toString() as string,
                 connection: connection
             });
             let nftNumbersfterTransaction: number = nftArray2.length;
-            console.log(`NFT After Transaction: ${nftNumbersfterTransaction}`);
+
             let numberOfNFTAdded: number = nftNumbersfterTransaction - nftNumberBeforeTransaction[0] 
             const amount: BigNumber = new BigNumber(NFTamount)
-            console.log(` Number of NFT Added: ${numberOfNFTAdded}`);
+
             await validateTransfer(
                 connection,
                 signatureInfo.signature,
