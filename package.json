@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@metaplex/js": "^4.7.0",
+    "@nfteyez/sol-rayz": "^0.10.2",
     "@project-serum/anchor": "^0.25.0-beta.1",
     "@solana/pay": "^0.2.1",
     "@solana/spl-token": "^0.2.0",
@@ -19,9 +20,12 @@
     "@solana/wallet-adapter-wallets": "^0.16.1",
     "@solana/web3.js": "^1.43.4",
     "@tailwindcss/forms": "^0.5.0",
+    "@types/node": "18.0.0",
     "bignumber.js": "^9.0.2",
     "bs58": "^5.0.0",
     "dotenv": "^16.0.1",
+    "jsonwebtoken": "^8.5.1",
+    "mkdirp": "^1.0.4",
     "next": "12.2.1",
     "react": "18.2.0",
     "react-circular-progressbar": "^2.0.4",
@@ -30,6 +34,7 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.8",
     "@types/node": "18.0.0",
     "@types/react": "18.0.14",
     "@types/react-dom": "18.0.5",

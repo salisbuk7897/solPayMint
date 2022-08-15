@@ -120,7 +120,9 @@ export default function Qrcode() {
           },
           { commitment: "confirmed" }
         );
-        router.push("/confirmed");
+        router.push({pathname: '/confirmed',
+                        query: { from: "QR CODE" }})
+        //router.push("/confirmed");
       } catch (e) {
         if (e instanceof FindReferenceError) {
           // No transaction found yet, ignore this error

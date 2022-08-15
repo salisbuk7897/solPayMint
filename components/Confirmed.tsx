@@ -20,21 +20,10 @@ export default function Confirmed() {
   }, [])
 
   return (
-    <div>
-      <div className="w-full">
-        <CircularProgressbar value={percentage} text={text} styles={
-                buildStyles({
-                  pathColor: '#00BA00',
-                })
-        } />
-      </div>
-      <div className="w-full">
-        <ul className="text-left mt-5 text-lg text-white font-light w-full text-base w-full">
-          <li> Amount Paid: {amount} {token}</li>
-          <li> Mint Signature: {sign}</li>
-          <li className="w-full"> Signature Verification: {verify == "true" ? "Successfully Verified" : "Verification Failed"}</li>
-        </ul>
-      </div>
-    </div>
+      <CircularProgressbar value={percentage} text={text} styles={
+              buildStyles({
+                pathColor: '#00BA00',
+              })
+      } />
   )
 }
