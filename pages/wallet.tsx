@@ -15,6 +15,12 @@ import {
     getCandyMachineState,
 } from "../utils";
 import { useRouter } from "next/router";
+//import { getParsedNftAccountsByOwner,isValidSolanaAddress, createConnectionConfig} from "@nfteyez/sol-rayz";
+import {
+    resolveToWalletAddress,
+    getParsedNftAccountsByOwner,
+  } from "@nfteyez/sol-rayz";
+
 
 const candyMachineId = new anchor.web3.PublicKey(
     process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
@@ -23,7 +29,6 @@ const candyMachineId = new anchor.web3.PublicKey(
 const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
 const anchorConnection = new anchor.web3.Connection(rpcHost);
 
-
 export default function wallet(){
     console.log("in wallet");
     const router = useRouter();
@@ -31,7 +36,9 @@ export default function wallet(){
     const { publicKey, sendTransaction } = useWallet();
     let NFTamount = 0;
     let balanceBeforeTransaction = useState<number>(0);
+    let nftNumberBeforeTransaction = useState<number>(0);
     let balanceAfterTransaction = 0
+    let nftNumbersfterTransaction : number = 0
     let shop = "";
     // State to hold API response fields
     const [message, setMessage] = useState<string | null>(null);
@@ -49,6 +56,7 @@ export default function wallet(){
     const reference = useMemo(() => Keypair.generate().publicKey, []);
     // Add it to the params we'll pass to the API
     searchParams.append('reference', reference.toString());
+
 
     // Use our API to fetch the transaction for the selected items
     async function getTransaction() {
@@ -107,6 +115,12 @@ export default function wallet(){
         }
         let bbt = (await connection.getBalance(anchorWallet.publicKey)) / LAMPORTS_PER_SOL
         balanceBeforeTransaction[0] = bbt; 
+        //console.log(transaction);
+        const nftArray = await getParsedNftAccountsByOwner({
+            publicAddress: publicKey.toString() as string,
+            connection: connection
+        });
+        nftNumberBeforeTransaction[0] = nftArray.length; 
     }
 
     useEffect(() => {
@@ -125,8 +139,8 @@ export default function wallet(){
                 publicKey: wallet.publicKey
             } as anchor.Wallet;
             const walletSignature = await sendTransaction(transaction, connection)
-            let bbt = (await connection.getBalance(anchorWallet.publicKey)) / LAMPORTS_PER_SOL
-            balanceBeforeTransaction[0] = bbt;;
+            /* let bbt = (await connection.getBalance(anchorWallet.publicKey)) / LAMPORTS_PER_SOL
+            balanceBeforeTransaction[0] = bbt; */
         } catch (e) {
             console.error(e)
         }
@@ -148,10 +162,18 @@ export default function wallet(){
             let bat = (await connection.getBalance(anchorWallet.publicKey)) / LAMPORTS_PER_SOL
             balanceAfterTransaction = bat
             //console.log(` Before: ${balanceBeforeTransaction}, mpk: ${mintPublicKey}, sign: ${mintSignature}`);
-            console.log(` After: ${balanceAfterTransaction}`);
+            //console.log(` After: ${balanceAfterTransaction}`);
             let cost = balanceBeforeTransaction[0] - balanceAfterTransaction
             console.log(` Amount Paid: ${cost}`);
+            const nftArray2 = await getParsedNftAccountsByOwner({
+                publicAddress: publicKey?.toString() as string,
+                connection: connection
+            });
+            let nftNumbersfterTransaction: number = nftArray2.length;
+            console.log(`NFT After Transaction: ${nftNumbersfterTransaction}`);
+            let numberOfNFTAdded: number = nftNumbersfterTransaction - nftNumberBeforeTransaction[0] 
             const amount: BigNumber = new BigNumber(NFTamount)
+            console.log(` Number of NFT Added: ${numberOfNFTAdded}`);
             await validateTransfer(
                 connection,
                 signatureInfo.signature,
@@ -161,7 +183,7 @@ export default function wallet(){
                 },
                 { commitment: 'confirmed' }
               )
-            console.log(`verify Mint Account signature: ${verifyMintSignatureResult[0]}`);
+            //console.log(`verify Mint Account signature: ${verifyMintSignatureResult[0]}`);
             router.push({pathname: '/confirmed',
                         query: { token: "SOL" , amount: cost.toFixed(3), sign: `${mintSignature[0]}`, verify: `${verifyMintSignatureResult[0]}` }})
         } catch (e) {
