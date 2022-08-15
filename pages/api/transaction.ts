@@ -1,27 +1,14 @@
 import * as anchor from "@project-serum/anchor";
+import * as nacl from "tweetnacl";
 
+import { Connection, Keypair, PublicKey, SystemProgram, Transaction, TransactionInstruction, clusterApiUrl } from '@solana/web3.js';
+import { NextApiRequest, NextApiResponse } from "next"
 import {
-  CandyMachine,
-  awaitTransactionSignatureConfirmation,
   getCandyMachineState,
-  mintMultipleToken,
   mintToken
 } from "../../utils";
-import { Connection, Keypair, PublicKey, SystemProgram, Transaction, TransactionInstruction, clusterApiUrl } from '@solana/web3.js';
-import { MintLayout, TOKEN_PROGRAM_ID } from "@solana/spl-token";
-import { NATIVE_MINT, createTransferCheckedInstruction, getAccount, getAssociatedTokenAddress, getMint } from '@solana/spl-token';
-import { NextApiRequest, NextApiResponse } from "next"
-import { createInitializeMintInstruction, createMintToInstruction } from "@solana/spl-token";
-import { useEffect, useMemo, useRef } from "react";
 
-import BigNumber from 'bignumber.js';
-import { CandyMachineState } from "../../utils/candyMachine.model"
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base"
-import base58 from 'bs58'
-import { sendTransactions } from "../../utils/candyMachine.helpers";
-import { useWallet } from "@solana/wallet-adapter-react";
-import * as nacl from "tweetnacl";
 
 export type TransactionInputData = {
   account: string,
@@ -35,12 +22,12 @@ type TransactionGetResponse = {
 export type TransactionOutputData = {
   transaction: string,
   message: string,
-  mintSignature : Uint8Array,
-  mintPublicKey : Uint8Array,
+  mintSignature: Uint8Array,
+  mintPublicKey: Uint8Array,
   verifyMintSignatureResult: boolean
 }
 
-type ErrorOutput = {
+export type ErrorOutput = {
   error: string
 }
 
@@ -90,7 +77,7 @@ async function post(
     // We pass the buyer's public key in JSON body
     const { account } = req.body as TransactionInputData
     if (!account) {
-      res.status(40).json({ error: "No account provided" })
+      res.status(400).json({ error: "No account provided" })
       return
     }
 
@@ -102,18 +89,19 @@ async function post(
     const buyerPublicKey = new PublicKey(account)
     const dummy_key_pair = new anchor.web3.Keypair();
     const walletWrapper = new anchor.Wallet(dummy_key_pair);
-    const { candyMachine, goLiveDate, itemsRemaining } =
+    const { candyMachine, itemsRemaining } =
       await getCandyMachineState(
         walletWrapper,
         candyMachineId,
         connection
       );
-    //console.log({ candyMachine, goLiveDate, itemsRemaining })
+    if (itemsRemaining === 0) {
+      return res.status(400).json({ error: "Insufficient Nfts to mint" });
+    }
 
 
     //Get minting instructions and signers
     const mintInstructions = await mintToken(candyMachine, buyerPublicKey, reference as string);
-    //console.log({ mintInstructions })
 
     //minting instructions
     const instructions: any = mintInstructions?.instructions;
@@ -149,19 +137,18 @@ async function post(
     transaction.add(transferIx) // Payment Instructions
     transaction.add(...instructions);//console.log(instruction))//
 
-   
+
     //const pkey = 
-    //console.log(signers[0]["_keypair"])
     const mintPublicKey = signers[0]["_keypair"]["publicKey"]
     const mintSecretKey = signers[0]["_keypair"]["secretKey"]
-    //console.log(typeof(signers));
-    
+
     transaction.partialSign(...signers);
 
     // Serialize the transaction and convert to base64 to return it
     const serializedTransaction = transaction.serialize({
       requireAllSignatures: false
     })
+    console.log({ serializedTransaction })
 
     const mintSignature = nacl.sign.detached(serializedTransaction, mintSecretKey);
     const verifyMintSignatureResult = nacl.sign.detached.verify(
@@ -169,10 +156,6 @@ async function post(
       mintSignature,
       mintPublicKey // you should use the raw pubkey (32 bytes) to verify
     );
-    //console.log(serializedTransaction)
-    //console.log(mintPublicKey)
-
-
 
     const base64 = serializedTransaction.toString('base64')
 
