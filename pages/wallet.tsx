@@ -120,9 +120,7 @@ export default function wallet(){
             publicAddress: publicKey.toString() as string,
             connection: connection
         });
-        console.log(nftArray)
         nftNumberBeforeTransaction[0] = nftArray.length; 
-        console.log(`NFT number before Transaction : ${nftArray.length}`);
     }
 
     useEffect(() => {
