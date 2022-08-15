@@ -24,7 +24,7 @@ async function post(
           const {accesstoken} = req.body
           const path = join(__dirname, "../../../../config")
           const file = join(__dirname, "../../../../config/conf.json")
-          //console.log(path)
+
           var configuration = {owner: `${owner}`, accesstoken: `${accesstoken}`, candyMachineID: "", rpcHost: "", network: ""}
           await fs.mkdir(path, {recursive: true}, err => {});
           fs.writeFile(file, JSON.stringify(configuration, null, '\t'), function(err) {
@@ -48,7 +48,7 @@ async function post(
       
             // Display the file content
             const config: any = data;
-            //console.log(config)
+
             return res.status(200).json({
               message: config
             })

@@ -38,7 +38,6 @@ export default function candy(){
         } as any)
     );
 
-    //console.log(`Price: ${parseInt(data.price)/LAMPORTS_PER_SOL}, treasury: ${treasury}`)
     useEffect(() => {
         try{
             (async () => {
@@ -57,7 +56,6 @@ export default function candy(){
                 const treasury = candyMachine.state.wallet
                 setPrice(price/LAMPORTS_PER_SOL);
                 setTreasury(treasury);
-                console.log(`Price: ${price/LAMPORTS_PER_SOL}, treasury: ${treasury}`)
             })();
         }catch(e){ 
             console.log(e)

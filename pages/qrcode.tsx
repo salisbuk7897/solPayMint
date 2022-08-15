@@ -28,7 +28,7 @@ const dummy_key_pair = Keypair.generate();
 const wallet = dummy_key_pair.publicKey;
 
 export default function Qrcode() {
-  console.log("in qr");
+
   const router = useRouter();
   const qrRef = useRef<HTMLDivElement>(null);
   let NFTamount = 0;
@@ -54,7 +54,7 @@ export default function Qrcode() {
         const anchorWallet = {
           publicKey: wallet,
         } as anchor.Wallet;
-        console.log("wallet")
+
         const data = await getCandyMachineState(
           anchorWallet,
           candyMachineId,
@@ -74,7 +74,7 @@ export default function Qrcode() {
         const apiUrl = `${location.protocol}//${
           location.host
         }/api/transaction?${searchParams.toString()}`;
-        console.log(apiUrl);
+
         const urlParams: TransactionRequestURLFields = {
           link: new URL(apiUrl),
           label: "SolPay Mint",
@@ -106,7 +106,7 @@ export default function Qrcode() {
         );
         router.push({pathname: '/confirmed',
                         query: { from: "QR CODE" }})
-        //router.push("/confirmed");
+
       } catch (e) {
         if (e instanceof FindReferenceError) {
           // No transaction found yet, ignore this error

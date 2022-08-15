@@ -2,7 +2,7 @@ import { useWallet } from "@solana/wallet-adapter-react";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { useEffect, useState } from "react";
 import * as anchor from "@project-serum/anchor";
-import { sign, SignOptions } from 'jsonwebtoken';
+import { sign } from 'jsonwebtoken';
 
 export default function Config() {
   const { publicKey } = useWallet();
@@ -36,7 +36,7 @@ export default function Config() {
       setHasConfig("Yes")
       
       const config = JSON.parse(json.message)
-      //console.log();
+
       setOwner(`${config["owner"]}`)
       setAccessToken(`${config["accesstoken"]}`)
       setCMIRead(`${config["candyMachineID"]}`)
@@ -44,22 +44,11 @@ export default function Config() {
       setRPCRead(`${config["rpcHost"]}`)
     }else{
       setHasConfig("No")
-      //console.log("No Config")
+
     }
     })()
     
   })
-
-  /* useEffect(() => {
-    (async() => {
-      if(accessToken != ''){
-        const jwt = await generateToken()
-        console.log(jwt)
-      }
-      
-    })()
-    
-  }) */
 
   const View = async () => {
     setView("Yes");
@@ -112,14 +101,6 @@ export default function Config() {
     }
   }
 
-  /* const onSubmitLogin = async (event: { preventDefault: () => void; }) => {
-    event.preventDefault(); // Prevent default submission
-    try {
-      
-    } catch (e) {
-    }
-  } */
-
   const onSubmitOwnership = async (event: { preventDefault: () => void; }) => {
     event.preventDefault(); // Prevent default submission
     try {
@@ -163,7 +144,6 @@ export default function Config() {
       return{res: "failed"}
     }
     
-    //console.log(`cmi: ${cmi}, rpc: ${rpc}, net: ${net}`)
   }
 
   async function generateToken() {
@@ -173,8 +153,6 @@ export default function Config() {
     };
     // read private key value
     const privateKey = accessToken;
-  
-    //console.log(`${privateKey}, ${payload}`)
   
     // generate JWT
     return sign(payload, privateKey, {expiresIn: "5m"});
