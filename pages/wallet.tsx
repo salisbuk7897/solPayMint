@@ -5,6 +5,10 @@ import * as anchor from "@project-serum/anchor";
 import { FindReferenceError, findReference, validateTransfer } from "@solana/pay";
 import { Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import { TransactionInputData, TransactionOutputData } from "../pages/api/transaction";
+import {
+    getParsedNftAccountsByOwner,
+    resolveToWalletAddress,
+} from "@nfteyez/sol-rayz";
 import { useConnection, useWallet } from "@solana/wallet-adapter-react";
 import { useEffect, useMemo, useState } from "react";
 
@@ -15,12 +19,6 @@ import {
     getCandyMachineState,
 } from "../utils";
 import { useRouter } from "next/router";
-//import { getParsedNftAccountsByOwner,isValidSolanaAddress, createConnectionConfig} from "@nfteyez/sol-rayz";
-import {
-    resolveToWalletAddress,
-    getParsedNftAccountsByOwner,
-  } from "@nfteyez/sol-rayz";
-
 
 const candyMachineId = new anchor.web3.PublicKey(
     process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
@@ -161,8 +159,7 @@ export default function wallet(){
             } as anchor.Wallet;
             let bat = (await connection.getBalance(anchorWallet.publicKey)) / LAMPORTS_PER_SOL
             balanceAfterTransaction = bat
-            //console.log(` Before: ${balanceBeforeTransaction}, mpk: ${mintPublicKey}, sign: ${mintSignature}`);
-            //console.log(` After: ${balanceAfterTransaction}`);
+
             let cost = balanceBeforeTransaction[0] - balanceAfterTransaction
             console.log(` Amount Paid: ${cost}`);
             const nftArray2 = await getParsedNftAccountsByOwner({
@@ -183,9 +180,10 @@ export default function wallet(){
                 },
                 { commitment: 'confirmed' }
               )
-            //console.log(`verify Mint Account signature: ${verifyMintSignatureResult[0]}`);
+
+              
             router.push({pathname: '/confirmed',
-                        query: { token: "SOL" , amount: cost.toFixed(3), sign: `${mintSignature[0]}`, verify: `${verifyMintSignatureResult[0]}` }})
+            query: { from: "Wallet", NFTAdded: `${numberOfNFTAdded}`, token: "SOL" , amount: cost.toFixed(3), sign: `${mintSignature[0]}`, verify: `${verifyMintSignatureResult[0]}` }})
         } catch (e) {
             if (e instanceof FindReferenceError) {
             // No transaction found yet, ignore this error
