@@ -6,20 +6,25 @@ import React, {useEffect, useState} from "react";
 import Modal from "../components/modal";
 import NtfData  from "./nft"
 import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
-import envConfig from "../config/conf.json";
+/* import envConfig from "../config/conf.json";
 import { useWallet } from "@solana/wallet-adapter-react";
 
-const candyMachineId = new anchor.web3.PublicKey(
-  process.env.NEXT_PUBLIC_CANDY_MACHINE_ID! || envConfig.candyMachineID
-);
+let candyMachineId: any;
+try{
+    candyMachineId = new anchor.web3.PublicKey(
+        process.env.NEXT_PUBLIC_CANDY_MACHINE_ID! || envConfig.candyMachineID
+    );
+}catch(e){
+    candyMachineId = ""
+} */
 
 export default function Homepg() {
   const [showpo, setShowpo] = useState(false);
-  const wallet = useWallet();
+  /* const wallet = useWallet();
   const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST! || envConfig.rpcHost;
-const connection = new anchor.web3.Connection(rpcHost);
-  const [candyMachine, setCandyMachine] = useState<CandyMachine>();
-  useEffect(() => {
+  const connection = new anchor.web3.Connection(rpcHost);
+  const [candyMachine, setCandyMachine] = useState<CandyMachine>(); */
+  /* useEffect(() => {
     try{
       (async () => {
         const anchorWallet = {
@@ -38,7 +43,7 @@ const connection = new anchor.web3.Connection(rpcHost);
     }catch(err){
       console.log(err)
     }
-  },[wallet, candyMachineId, connection,])
+  },[wallet, candyMachineId, connection,]) */
 
   return (
     <div className="flex w-full justify-center items-center">

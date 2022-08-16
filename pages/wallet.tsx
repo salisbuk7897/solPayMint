@@ -183,7 +183,7 @@ export default function wallet(){
 
               
             router.push({pathname: '/confirmed',
-            query: { from: "Wallet", NFTAdded: `${numberOfNFTAdded}`, token: "SOL" , amount: cost.toFixed(3), sign: `${mintSignature[0]}`, verify: `${verifyMintSignatureResult[0]}` }})
+            query: { from: "Wallet", NFTAdded: `${numberOfNFTAdded}`, token: "SOL" , amount: cost.toFixed(3), verify: `${verifyMintSignatureResult[0]}` }})
         } catch (e) {
             if (e instanceof FindReferenceError) {
             // No transaction found yet, ignore this error
