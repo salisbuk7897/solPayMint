@@ -13,22 +13,23 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import BigNumber from "bignumber.js";
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
+import envConfig from "../config/conf.json"
 import {
   getCandyMachineState,
 } from "../utils";
 import { useRouter } from "next/router";
 
 const candyMachineId = new anchor.web3.PublicKey(
-  process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
+  process.env.NEXT_PUBLIC_CANDY_MACHINE_ID! || envConfig.candyMachineID
 );
 
-const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
+const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST! || envConfig.rpcHost;
 const anchorConnection = new anchor.web3.Connection(rpcHost);
 const dummy_key_pair = Keypair.generate();
 const wallet = dummy_key_pair.publicKey;
 
 export default function Qrcode() {
-  console.log("in qr");
+
   const router = useRouter();
   const qrRef = useRef<HTMLDivElement>(null);
   let NFTamount = 0;
@@ -54,7 +55,7 @@ export default function Qrcode() {
         const anchorWallet = {
           publicKey: wallet,
         } as anchor.Wallet;
-        console.log("wallet")
+
         const data = await getCandyMachineState(
           anchorWallet,
           candyMachineId,
@@ -74,7 +75,7 @@ export default function Qrcode() {
         const apiUrl = `${location.protocol}//${
           location.host
         }/api/transaction?${searchParams.toString()}`;
-        console.log(apiUrl);
+
         const urlParams: TransactionRequestURLFields = {
           link: new URL(apiUrl),
           label: "SolPay Mint",
@@ -106,7 +107,7 @@ export default function Qrcode() {
         );
         router.push({pathname: '/confirmed',
                         query: { from: "QR CODE" }})
-        //router.push("/confirmed");
+
       } catch (e) {
         if (e instanceof FindReferenceError) {
           // No transaction found yet, ignore this error

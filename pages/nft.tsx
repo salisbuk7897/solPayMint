@@ -7,15 +7,16 @@ import {
     getCandyMachineState
 } from "../utils";
 import { useEffect, useState } from "react";
-import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 
+import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import envConfig from "../config/conf.json"
 import { useWallet } from "@solana/wallet-adapter-react";
 
 const candyMachineId = new anchor.web3.PublicKey(
-    process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
+    process.env.NEXT_PUBLIC_CANDY_MACHINE_ID! || envConfig.candyMachineID
 );
 
-const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
+const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST! || envConfig.rpcHost;
 const connection = new anchor.web3.Connection(rpcHost);
 
 export default function NtfData():any {

@@ -314,12 +314,12 @@ export const mintMultipleToken = async (
     }
 };
 
-export const candyAnchorWallet =() => {
+export const candyAnchorWallet = () => {
     const dummy_key_pair = new anchor.web3.Keypair();
     const walletWrapper = new anchor.Wallet(dummy_key_pair);
-    return({walletWrapper})
+    return ({ walletWrapper })
 }
-    
+
 
 export const mintToken = async (
     candyMachine: any,
@@ -333,7 +333,7 @@ export const mintToken = async (
         const rent = await connection.getMinimumBalanceForRentExemption(
             MintLayout.span
         );
-        //console.log("MINT:", mint)
+
         const instructions = [
             anchor.web3.SystemProgram.createAccount({
                 fromPubkey: payer,
@@ -410,13 +410,13 @@ export const mintToken = async (
                     (await candyMachine.program.account.collectionPda.fetch(
                         collectionPDA
                     )) as CollectionData;
-                console.log(collectionData);
+
                 const collectionMint = collectionData.mint;
                 const collectionAuthorityRecord = await getCollectionAuthorityRecordPDA(
                     collectionMint,
                     collectionPDA
                 );
-                console.log(collectionMint);
+
                 if (collectionMint) {
                     const collectionMetadata = await getMetadata(collectionMint);
                     const collectionMasterEdition = await getMasterEdition(
@@ -452,7 +452,7 @@ export const mintToken = async (
                 console.error(error);
             }
         }
-        
+
         const signers: anchor.web3.Keypair[] = [mint];
 
         return { instructions, signers };

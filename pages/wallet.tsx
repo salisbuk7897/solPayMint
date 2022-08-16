@@ -11,34 +11,33 @@ import { useEffect, useMemo, useState } from "react";
 import BigNumber from 'bignumber.js';
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
+import { env } from "process";
+import envConfig from "../config/conf.json"
 import {
     getCandyMachineState,
 } from "../utils";
-import { useRouter } from "next/router";
-//import { getParsedNftAccountsByOwner,isValidSolanaAddress, createConnectionConfig} from "@nfteyez/sol-rayz";
 import {
-    resolveToWalletAddress,
     getParsedNftAccountsByOwner,
-  } from "@nfteyez/sol-rayz";
-
+} from "@nfteyez/sol-rayz";
+import { useRouter } from "next/router";
 
 const candyMachineId = new anchor.web3.PublicKey(
-    process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
+    process.env.NEXT_PUBLIC_CANDY_MACHINE_ID! || envConfig.candyMachineID
 );
 
-const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
+const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST! || envConfig.rpcHost;
 const anchorConnection = new anchor.web3.Connection(rpcHost);
 
 export default function wallet(){
-    console.log("in wallet");
+
     const router = useRouter();
     const { connection } = useConnection();
     const { publicKey, sendTransaction } = useWallet();
+
     let NFTamount = 0;
     let balanceBeforeTransaction = useState<number>(0);
     let nftNumberBeforeTransaction = useState<number>(0);
     let balanceAfterTransaction = 0
-    let nftNumbersfterTransaction : number = 0
     let shop = "";
     // State to hold API response fields
     const [message, setMessage] = useState<string | null>(null);
@@ -95,7 +94,6 @@ export default function wallet(){
             })
 
             const json: TransactionOutputData = await response.json() as any
-            console.log("WALLET",{ response: json })
 
             if (response.status !== 200) {
                 console.error(json);
@@ -115,7 +113,7 @@ export default function wallet(){
         }
         let bbt = (await connection.getBalance(anchorWallet.publicKey)) / LAMPORTS_PER_SOL
         balanceBeforeTransaction[0] = bbt; 
-        //console.log(transaction);
+
         const nftArray = await getParsedNftAccountsByOwner({
             publicAddress: publicKey.toString() as string,
             connection: connection
@@ -161,19 +159,18 @@ export default function wallet(){
             } as anchor.Wallet;
             let bat = (await connection.getBalance(anchorWallet.publicKey)) / LAMPORTS_PER_SOL
             balanceAfterTransaction = bat
-            //console.log(` Before: ${balanceBeforeTransaction}, mpk: ${mintPublicKey}, sign: ${mintSignature}`);
-            //console.log(` After: ${balanceAfterTransaction}`);
+
             let cost = balanceBeforeTransaction[0] - balanceAfterTransaction
-            console.log(` Amount Paid: ${cost}`);
+
             const nftArray2 = await getParsedNftAccountsByOwner({
                 publicAddress: publicKey?.toString() as string,
                 connection: connection
             });
             let nftNumbersfterTransaction: number = nftArray2.length;
-            console.log(`NFT After Transaction: ${nftNumbersfterTransaction}`);
+
             let numberOfNFTAdded: number = nftNumbersfterTransaction - nftNumberBeforeTransaction[0] 
             const amount: BigNumber = new BigNumber(NFTamount)
-            console.log(` Number of NFT Added: ${numberOfNFTAdded}`);
+
             await validateTransfer(
                 connection,
                 signatureInfo.signature,
@@ -183,9 +180,10 @@ export default function wallet(){
                 },
                 { commitment: 'confirmed' }
               )
-            //console.log(`verify Mint Account signature: ${verifyMintSignatureResult[0]}`);
+
+              
             router.push({pathname: '/confirmed',
-                        query: { token: "SOL" , amount: cost.toFixed(3), sign: `${mintSignature[0]}`, verify: `${verifyMintSignatureResult[0]}` }})
+            query: { from: "Wallet", NFTAdded: `${numberOfNFTAdded}`, token: "SOL" , amount: cost.toFixed(3), sign: `${mintSignature[0]}`, verify: `${verifyMintSignatureResult[0]}` }})
         } catch (e) {
             if (e instanceof FindReferenceError) {
             // No transaction found yet, ignore this error

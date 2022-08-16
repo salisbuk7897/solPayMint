@@ -9,13 +9,14 @@ import {
 import { useEffect, useState } from "react";
 
 import { LAMPORTS_PER_SOL } from "@solana/web3.js";
+import envConfig from "../config/conf.json";
 import { useWallet } from "@solana/wallet-adapter-react";
 
 const candyMachineId = new anchor.web3.PublicKey(
-    process.env.NEXT_PUBLIC_CANDY_MACHINE_ID!
+    process.env.NEXT_PUBLIC_CANDY_MACHINE_ID! || envConfig.candyMachineID
 );
 
-const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST!;
+const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST! || envConfig.rpcHost;
 const connection = new anchor.web3.Connection(rpcHost);
 
 export default function candy(){
@@ -38,7 +39,6 @@ export default function candy(){
         } as any)
     );
 
-    //console.log(`Price: ${parseInt(data.price)/LAMPORTS_PER_SOL}, treasury: ${treasury}`)
     useEffect(() => {
         try{
             (async () => {
@@ -57,7 +57,6 @@ export default function candy(){
                 const treasury = candyMachine.state.wallet
                 setPrice(price/LAMPORTS_PER_SOL);
                 setTreasury(treasury);
-                console.log(`Price: ${price/LAMPORTS_PER_SOL}, treasury: ${treasury}`)
             })();
         }catch(e){ 
             console.log(e)
